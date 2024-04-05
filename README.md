@@ -32,7 +32,7 @@ The Online Appointment Application aims to address the inefficiencies in appoint
 ## Requirements and Installation:
 
 * Ensure Node.js and Expo CLI are installed.
-* Open the terminal in the project folder and run `npm install` to install dependencies.
+* Open the terminal in the project folder and run `yarn install` to install dependencies.
 * Create a Firebase account and add the Firebase configuration to the project.
 * Start the project by running the `npx expo start` command in the terminal. To try the application live an emulator needed also.
 

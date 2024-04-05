@@ -7,7 +7,7 @@ import {
     Alert,
     ActivityIndicator,
 } from "react-native";
-import Button from "../components/button/Button";
+import Button from "../components/Button/Button";
 import React, { useState, useEffect, useRef } from "react";
 import { Calendar } from "react-native-calendars";
 import moment from "moment";

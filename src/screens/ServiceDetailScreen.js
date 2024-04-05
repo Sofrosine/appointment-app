@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet, Text, Image, ScrollView, Share, TouchableOpacity } from "react-native";
-import Button from "../components/button/Button";
+import Button from "../components/Button/Button";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { colors, sizes } from "../styles/Theme";
 import userImages from "../utils/UserImageUtils";
