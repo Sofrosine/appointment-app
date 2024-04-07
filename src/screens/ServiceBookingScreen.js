@@ -12,7 +12,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { Calendar } from "react-native-calendars";
 import moment from "moment";
 import { colors } from "../styles/Theme";
-import { getAuth } from "firebase/auth";
 import { getDatabase, push, ref, get, child, update } from "firebase/database";
 import { showTopMessage } from "../utils/ErrorHandler";
 import TimeSlot from "../components/TimeSlot";
@@ -23,6 +22,9 @@ import {
   handleNotification,
 } from "../utils/NotificationService";
 import userImages from "../utils/UserImageUtils";
+import { app, getAuth } from "../../firebaseConfig";
+
+const auth = getAuth(app);
 
 export default function ServiceBookingScreen({ route, navigation }) {
   const { item } = route.params;
@@ -39,8 +41,7 @@ export default function ServiceBookingScreen({ route, navigation }) {
   const today = moment().format("YYYY-MM-DD");
   const threeMonthsLater = moment().add(3, "months").format("YYYY-MM-DD");
 
-  const auth = getAuth();
-  const user = auth.currentUser;
+  const user = auth?.currentUser;
 
   const getTimeListFromDatabase = async () => {
     setLoading(true);

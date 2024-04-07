@@ -1,4 +1,4 @@
-import { getAuth } from "firebase/auth";
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -12,17 +12,18 @@ import { child, get, getDatabase, ref } from "firebase/database";
 import parseContentData from "../utils/ParseContentData";
 import CardAppointmentSmall from "../components/CardAppointmentSmall";
 import { sortAppointmentsByDateAndTime } from "../utils/CalendarUtils";
+import { app, getAuth } from "../../firebaseConfig";
 
+const auth = getAuth(app);
 export default function NotificationsScreen({ navigation }) {
   const [appointmentList, setAppointmentList] = useState([]);
   const [userAuth, setUserAuth] = useState(null);
   const [isReady, setIsReady] = useState(false);
 
-  const auth = getAuth();
-  const user = auth.currentUser;
+  const user = auth?.currentUser;
 
   useEffect(() => {
-    auth.onAuthStateChanged((userAuth) => {
+    auth?.onAuthStateChanged((userAuth) => {
       setUserAuth(!!userAuth);
     });
   }, []);

@@ -9,7 +9,6 @@ import {
   Alert,
 } from "react-native";
 import parseContentData from "../utils/ParseContentData";
-import { getAuth } from "firebase/auth";
 import { colors, sizes } from "../styles/Theme";
 import CardAppointment from "../components/CardAppointment";
 import { showTopMessage } from "../utils/ErrorHandler";
@@ -18,12 +17,13 @@ import {
   configureNotifications,
   handleNotification,
 } from "../utils/NotificationService";
+import { app, getAuth } from "../../firebaseConfig";
 
+const auth = getAuth(app);
 export default function CalendarScreen() {
   const [loading, setLoading] = useState(true);
   const [appointmentList, setAppointmentList] = useState([]);
-  const auth = getAuth();
-  const user = auth.currentUser;
+  const user = auth?.currentUser;
 
   // Notification setup
   useEffect(() => {
@@ -38,12 +38,12 @@ export default function CalendarScreen() {
   const fetchData = () => {
     const dbRef = ref(getDatabase());
 
-    get(child(dbRef, "userAppointments/" + user.uid))
+    get(child(dbRef, "userAppointments/" + user?.uid))
       .then((snapshot) => {
         if (snapshot.exists()) {
-          const data = parseContentData(snapshot.val());
+          const data = parseContentData(snapshot?.val());
 
-          const servicePromises = data.map((appointment) =>
+          const servicePromises = data?.map((appointment) =>
             fetchServiceInfo(appointment.serviceId)
           );
 
@@ -51,7 +51,7 @@ export default function CalendarScreen() {
           Promise.all(servicePromises)
             // Add service information to appointment data
             .then((serviceInfos) => {
-              const appointmentList = data.map((appointment, index) => ({
+              const appointmentList = data?.map((appointment, index) => ({
                 ...appointment,
                 serviceInfo: serviceInfos[index],
               }));

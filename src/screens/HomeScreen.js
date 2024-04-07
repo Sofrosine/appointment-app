@@ -1,4 +1,4 @@
-import { getAuth } from "firebase/auth";
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -18,6 +18,7 @@ import { sortAppointmentsByDateAndTime } from "../utils/CalendarUtils";
 import categories from "../utils/Categories";
 import { CardCarousel } from "../components/CardCarousel";
 import Category from "../components/Category";
+import { app, getAuth } from "../../firebaseConfig";
 
 const userInfo = {
   id: 0,
@@ -26,18 +27,18 @@ const userInfo = {
   district: "Ataşehir",
 };
 
+const auth = getAuth(app);
 export default function HomeScreen({ navigation }) {
   const [appointmentList, setAppointmentList] = useState([]);
 
   const [userAuth, setUserAuth] = useState(null);
   const [isReady, setIsReady] = useState(false);
 
-  const auth = getAuth();
-  const user = auth.currentUser;
+  const user = auth?.currentUser;
 
   // User session
   useEffect(() => {
-    auth.onAuthStateChanged((userAuth) => {
+    auth?.onAuthStateChanged((userAuth) => {
       setUserAuth(!!userAuth);
     });
   }, []);

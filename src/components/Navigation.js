@@ -15,11 +15,11 @@ import UserInfosScreen from "../screens/UserInfosScreen";
 import BookingHistoryScreen from "../screens/BookingHistoryScreen";
 import FeedBackScreen from "../screens/FeedBackScreen";
 
-import app from "../../firebaseConfig";
+import app, { getAuth } from "../../firebaseConfig";
 import iconPref, { customTabButton } from "../utils/NavBarUtils";
 import { useState } from "react";
-import { getAuth } from "firebase/auth";
 import { useEffect } from "react";
+import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -148,14 +148,16 @@ function MapStack() {
   );
 }
 
+const auth = getAuth(app)
 export default Navigation = () => {
-  const [user, setUser] = useState(getAuth(app).currentUser);
-  const auth = getAuth();
+  const [user, setUser] = useState({});
 
-  //check authentication
+  // check authentication
   useEffect(() => {
-    auth.onAuthStateChanged((user) => {
-      setUser(!!user);
+    auth?.onAuthStateChanged(async (user) => {
+      if (user) {
+        setUser(!!user);
+      }
     });
   }, []);
 

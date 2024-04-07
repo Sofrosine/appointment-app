@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Button from "../components/Button/Button";
 import InputBar from "../components/InputBar";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  browserLocalPersistence,
+  getAuth,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import app from "../../firebaseConfig";
 import { Formik } from "formik";
 import ErrorHandler, { showTopMessage } from "../utils/ErrorHandler";
