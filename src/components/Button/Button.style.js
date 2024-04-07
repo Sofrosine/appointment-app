@@ -16,7 +16,7 @@ const style_base = StyleSheet.create({
         textAlign: "center",
         fontSize: 18,
         padding: 10,
-        fontFamily:"Mulish-Bold"
+        fontFamily:"Mulish_700Bold"
     },
     activity_icon :{
         padding: 13,
