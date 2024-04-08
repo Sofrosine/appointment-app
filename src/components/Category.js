@@ -1,7 +1,7 @@
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet, Dimensions } from "react-native";
 import { colors } from "../styles/Theme";
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -11,8 +11,8 @@ const Category = ({ category, isSelected, onPress }) => {
       style={[styles.button, isSelected ? styles.selectedButton : null]}
       onPress={onPress}
     >
-      <Ionicons
-        name={category.icon}
+      <FontAwesome5
+        name={category?.icon}
         size={36}
         color={isSelected ? colors.color_white : colors.color_primary}
         style={styles.icon}
@@ -27,7 +27,8 @@ const Category = ({ category, isSelected, onPress }) => {
 const styles = StyleSheet.create({
   button: {
     alignItems: "center",
-    padding: 16,
+    padding: 8,
+    paddingTop: 12,
     marginHorizontal: 8,
     marginVertical: 8,
     borderRadius: 10,
@@ -42,7 +43,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: colors.color_primary,
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Mulish_500Medium",
     textAlign: "center",
   },

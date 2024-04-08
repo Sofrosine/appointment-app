@@ -20,6 +20,8 @@ const firebaseConfig = {
   messagingSenderId: "967013242488",
   appId: "1:967013242488:web:b1c99384aa5d4a2166ff8d",
   measurementId: "G-M3Y8P239S9",
+  databaseURL:
+    "https://appointment-doctor-f6f50-default-rtdb.asia-southeast1.firebasedatabase.app",
 };
 
 // Initialize Firebase

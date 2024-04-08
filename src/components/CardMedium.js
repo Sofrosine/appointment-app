@@ -19,24 +19,24 @@ export default function CardMedium({ service, onSelect, image_source }) {
           <View style={styles.text_container}>
             <View style={styles.title_container}>
               <Text style={styles.title}>
-                {service.firstName} {service.lastName}
+                {service?.first_name} {service?.last_name}
               </Text>
-              <Text style={styles.desc}>{service.expert_area}</Text>
+              <Text style={styles.desc}>{service?.expert_area}</Text>
             </View>
 
-            <View style={styles.location_container}>
+            {/* <View style={styles.location_container}>
               <Ionicons
                 name="ios-location-outline"
                 size={18}
                 color={colors.color_primary}
               />
-              <Text style={styles.location}>{service.district}</Text>
-            </View>
+              <Text style={styles.location}>{service?.district}</Text>
+            </View> */}
           </View>
         </View>
         <View style={styles.skills_container}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {service.skills.map((skill, index) => (
+            {service?.skills?.map((skill, index) => (
               <View key={index} style={styles.chip_container}>
                 <Text style={styles.chips}>{skill}</Text>
               </View>

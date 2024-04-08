@@ -44,7 +44,7 @@ export default function MapScreen({ navigation }) {
   useEffect(() => {
     const dbRef = ref(getDatabase());
 
-    get(child(dbRef, "services"))
+    get(child(dbRef, "doctors"))
       .then((snapshot) => {
         if (snapshot.exists()) {
           const serviceList = parseContentData(snapshot.val());

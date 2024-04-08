@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, FlatList, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  FlatList,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
 import CardMedium from "../components/CardMedium";
 import SearchBar from "../components/SearchBar";
 import { getDatabase, ref, child, get } from "firebase/database";
@@ -10,6 +16,8 @@ import Category from "../components/Category";
 import { showTopMessage } from "../utils/ErrorHandler";
 import parseContentData from "../utils/ParseContentData";
 import userImages from "../utils/UserImageUtils";
+import { app } from "../../firebaseConfig";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function SearchScreen({ navigation, route }) {
   const [loading, setLoading] = useState(true);
@@ -22,18 +30,18 @@ export default function SearchScreen({ navigation, route }) {
   useEffect(() => {
     const dbRef = ref(getDatabase());
 
-    get(child(dbRef, "services"))
+    get(child(dbRef, "doctors"))
       .then((snapshot) => {
-        if (snapshot.exists()) {
-          const serviceList = parseContentData(snapshot.val());
+        if (snapshot?.exists()) {
+          const serviceList = parseContentData(snapshot?.val());
           setServiceList(serviceList);
 
           if (category) {
             const filteredList = filterServicesByCategory(
-              category.name,
+              category?.name,
               serviceList
             );
-            setSelectedCategory(category.name);
+            setSelectedCategory(category?.name);
             setFilteredServiceList(filteredList);
           } else {
             setFilteredServiceList(serviceList);
@@ -73,9 +81,9 @@ export default function SearchScreen({ navigation, route }) {
   const renderCategory = ({ item }) => (
     <Category
       category={item}
-      isSelected={selectedCategory === item.name}
-      onPress={() => handleCategoryFilter(item.name)}
-      key={item.name}
+      isSelected={selectedCategory === item?.name}
+      onPress={() => handleCategoryFilter(item?.name)}
+      key={item?.name}
     />
   );
 
@@ -84,15 +92,15 @@ export default function SearchScreen({ navigation, route }) {
   };
 
   const handleSearch = (text) => {
-    const searchedText = text.toLowerCase();
+    const searchedText = text?.toLowerCase();
 
-    const filteredList = serviceList.filter((service) => {
-      const skillsMatch = service.skills.some((skill) =>
-        skill.toLowerCase().includes(searchedText)
+    const filteredList = serviceList?.filter((service) => {
+      const skillsMatch = service?.skills?.some((skill) =>
+        skill?.toLowerCase()?.includes(searchedText)
       );
 
-      const expertAreaMatch = service.expert_area
-        .toLowerCase()
+      const expertAreaMatch = service?.expert_area
+        ?.toLowerCase()
         .includes(searchedText);
 
       return skillsMatch || expertAreaMatch;
@@ -122,9 +130,14 @@ export default function SearchScreen({ navigation, route }) {
               snapToInterval={sizes.width + 24}
               decelerationRate={"fast"}
               data={categories}
-              keyExtractor={(category) => category.name}
+              keyExtractor={(category) => category?.name}
               renderItem={renderCategory}
             />
+            {/* <TouchableOpacity
+              style={{ position: "absolute", right: 0, top: "40%" }}
+            >
+              <Ionicons name="arrow-forward" size={24} color={colors.color_primary} />
+            </TouchableOpacity> */}
           </View>
 
           <View style={styles.list_container}>
@@ -151,7 +164,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
   },
   category_container: {
-    marginHorizontal: 24,
+    marginLeft: 16
   },
   list_container: {
     marginBottom: 32,

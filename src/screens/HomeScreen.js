@@ -160,13 +160,13 @@ export default function HomeScreen({ navigation }) {
             </ImageBackground>
           </View>
           <View style={styles.app_container}>
-            <Text style={styles.text}>For You</Text>
+            {/* <Text style={styles.text}>For You</Text>
             <View>
               <CardCarousel
                 list={categories}
                 onSelectCategory={handleCategorySelect}
               />
-            </View>
+            </View> */}
 
             {appointmentList.length === 0 ? (
               <View />
