@@ -27,8 +27,8 @@ import { app, getAuth } from "../../firebaseConfig";
 const auth = getAuth(app);
 
 export default function ServiceBookingScreen({ route, navigation }) {
-  const { item } = route.params;
-  const serviceId = item.id;
+  const { item } = route.params || {};
+  const serviceId = item?.id;
   const scrollViewRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
@@ -151,8 +151,8 @@ export default function ServiceBookingScreen({ route, navigation }) {
 
   const pushAppointment = () => {
     const userId = user.uid;
-    const serviceId = item.id;
-    const appType = item.expert_area;
+    const serviceId = item?.id;
+    const appType = item?.expert_area;
     const bookedDate = selectedDate;
     const bookedTime = selectedTime;
 
@@ -224,22 +224,25 @@ export default function ServiceBookingScreen({ route, navigation }) {
       >
         {/* Header */}
         <View style={styles.header_container}>
-          <Image style={styles.image_container} source={userImages[item.id]} />
+          <Image
+            style={styles.image_container}
+            source={{ uri: item?.image_url }}
+          />
           <View>
             <View style={styles.title_container}>
               <Text style={styles.title}>
-                {item.firstName} {item.lastName}
+                {item?.first_name} {item?.last_name}
               </Text>
-              <Text style={styles.about}>{item.expert_area} Expert</Text>
+              <Text style={styles.about}>{item?.expert_area} Expert</Text>
             </View>
-            <View style={styles.location_container}>
+            {/* <View style={styles.location_container}>
               <Ionicons
                 name="ios-location-outline"
                 size={18}
                 color={colors.color_primary}
               />
-              <Text style={styles.location}>{item.district}</Text>
-            </View>
+              <Text style={styles.location}>{item?.district}</Text>
+            </View> */}
           </View>
         </View>
 
@@ -360,6 +363,7 @@ const styles = StyleSheet.create({
   about: {
     fontSize: 20,
     fontFamily: "Mulish_300Light",
+    textTransform: "capitalize",
   },
 
   title: {

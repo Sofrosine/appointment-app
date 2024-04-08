@@ -58,6 +58,17 @@ export default function SearchScreen({ navigation, route }) {
       });
   }, []);
 
+  useEffect(() => {
+    if (category) {
+      const filteredList = filterServicesByCategory(
+        category?.name,
+        serviceList
+      );
+      setSelectedCategory(category?.name);
+      setFilteredServiceList(filteredList);
+    }
+  }, [category]);
+
   const handleCategoryFilter = (category) => {
     if (selectedCategory === category) {
       setSelectedCategory("");
@@ -164,7 +175,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
   },
   category_container: {
-    marginLeft: 16
+    marginLeft: 16,
   },
   list_container: {
     marginBottom: 32,

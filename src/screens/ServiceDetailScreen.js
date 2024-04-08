@@ -14,7 +14,7 @@ import { colors, sizes } from "../styles/Theme";
 import userImages from "../utils/UserImageUtils";
 
 export default function ServiceDetailScreen({ route, navigation }) {
-  const { item } = route.params;
+  const { item } = route.params || {};
 
   const shareContent = async () => {
     try {
@@ -42,49 +42,50 @@ export default function ServiceDetailScreen({ route, navigation }) {
         </View>
         {/* Header */}
         <View style={styles.header_container}>
-          <Image style={styles.image_container} source={userImages[item.id]} />
+          <Image
+            style={styles.image_container}
+            source={{ uri: item?.image_url }}
+          />
           <View>
             <View style={styles.title_container}>
               <Text style={styles.title}>
-                {item.firstName} {item.lastName}
+                {item?.first_name} {item?.last_name}
               </Text>
-              <Text style={styles.about}>{item.expert_area} Expert</Text>
+              <Text style={styles.about}>{item?.expert_area} Expert</Text>
             </View>
-            <View style={styles.location_container}>
+            {/* <View style={styles.location_container}>
               <Ionicons
                 name="ios-location-outline"
                 size={18}
                 color={colors.color_primary}
               />
-              <Text style={styles.location}>{item.district}</Text>
-            </View>
+              <Text style={styles.location}>{item?.district}</Text>
+            </View> */}
           </View>
         </View>
         {/* Body */}
         <View style={styles.body_container}>
           <View style={styles.about_container}>
             <Text style={styles.about}>About</Text>
-
             <View style={styles.skills_container}>
-              {item.skills.map((skill, index) => (
+              {item?.skills.map((skill, index) => (
                 <View key={index} style={styles.chip_container}>
                   <Text style={styles.chips}>{skill}</Text>
                 </View>
               ))}
             </View>
 
-            <Text style={styles.desc}>{item.about}</Text>
+            <Text style={styles.desc}>{item?.about}</Text>
           </View>
         </View>
 
         <View style={styles.detail_container}>
           <View style={styles.detail}>
-            <Text style={styles.detail_text}>
-              {item.experience}+ Experience
-            </Text>
+            <Text style={styles.detail_text}>{item?.yoe}+</Text>
+            <Text style={styles.detail_text}>Experience</Text>
           </View>
           <View style={styles.detail}>
-            <Text style={styles.detail_text}>{item.numberOf_books}</Text>
+            <Text style={styles.detail_text}>{item?.appointments}</Text>
             <Text style={styles.detail_text}>Completed Appointments</Text>
           </View>
         </View>
@@ -155,6 +156,7 @@ const styles = StyleSheet.create({
   about: {
     fontSize: 20,
     fontFamily: "Mulish_300Light",
+    textTransform: "capitalize",
   },
   desc: {
     fontSize: 14,
@@ -185,7 +187,7 @@ const styles = StyleSheet.create({
   },
   detail_text: {
     textAlign: "center",
-    fontSize: 20,
+    fontSize: 16,
     fontFamily: "Mulish_600SemiBold",
     color: colors.color_primary,
   },

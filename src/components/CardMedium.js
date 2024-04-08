@@ -15,7 +15,7 @@ export default function CardMedium({ service, onSelect, image_source }) {
     <TouchableWithoutFeedback onPress={onSelect}>
       <View style={styles.container}>
         <View style={styles.info_container}>
-          <Image source={image_source} style={styles.image} />
+          <Image source={{ uri: service?.image_url }} style={styles.image} />
           <View style={styles.text_container}>
             <View style={styles.title_container}>
               <Text style={styles.title}>
@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Mulish_300Light",
     color: colors.color_gray,
+    textTransform: "capitalize",
   },
   location: {
     fontSize: 16,

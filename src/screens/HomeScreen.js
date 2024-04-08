@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -120,7 +119,12 @@ export default function HomeScreen({ navigation }) {
   };
 
   const handleCategorySelect = (selectedCategory) => {
-    navigation.navigate("SearchScreen", { category: selectedCategory });
+    navigation.navigate("Search", {
+      screen: "SearchScreen",
+      params: {
+        category: selectedCategory,
+      },
+    });
   };
 
   return (
