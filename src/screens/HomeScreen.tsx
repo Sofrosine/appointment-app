@@ -19,13 +19,7 @@ import { CardCarousel } from "../components/CardCarousel";
 import Category from "../components/Category";
 import { app, getAuth } from "../../firebaseConfig";
 import { useFocusEffect } from "@react-navigation/native";
-
-const userInfo = {
-  id: 0,
-  firstName: "Zehra",
-  lastName: "Güneş",
-  district: "Ataşehir",
-};
+import { useAppSelector } from "../hooks";
 
 const auth = getAuth(app);
 export default function HomeScreen({ navigation }) {
@@ -33,6 +27,8 @@ export default function HomeScreen({ navigation }) {
 
   const [userAuth, setUserAuth] = useState(null);
   const [isReady, setIsReady] = useState(false);
+
+  const { data: userData } = useAppSelector((state) => state.authReducer) || {};
 
   const user = auth?.currentUser;
 
@@ -102,7 +98,7 @@ export default function HomeScreen({ navigation }) {
           return null;
         }
       })
-      .catch(() => {
+      .catch((error) => {
         console.error(error);
         return null;
       });
@@ -153,15 +149,15 @@ export default function HomeScreen({ navigation }) {
               <View style={styles.welcome_container}>
                 <Text style={styles.welcome_text}>Welcome</Text>
                 <Text style={styles.welcome_text_bold}>
-                  {user ? ", " + userInfo.firstName : ""}
+                  {user ? ", " + userData?.first_name : ""}
                 </Text>
               </View>
               <Text style={styles.detail_text}>
-                Let's plan your weekly schedule together
+                Let's plan your schedule together
               </Text>
               <View style={styles.search_container}>
                 <SearchBar
-                  placeholder_text={"Search for Services"}
+                  placeholder_text={"Search for Doctors"}
                   onSearch={handleSearch}
                 />
               </View>
@@ -195,8 +191,9 @@ export default function HomeScreen({ navigation }) {
             )}
             <Text style={styles.text}>All Services</Text>
             <View style={styles.category_container}>
-              {categories.map((category) => (
+              {categories?.map((category) => (
                 <Category
+                  isSelected={false}
                   category={category}
                   key={category.name}
                   onPress={() => handleCategorySelect(category)}

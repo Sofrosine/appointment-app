@@ -1,4 +1,9 @@
-import { ActivityIndicator, Text, TouchableOpacity } from "react-native";
+import {
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+  ViewStyle,
+} from "react-native";
 import styles from "./Button.style";
 import { FC } from "react";
 
@@ -7,6 +12,7 @@ interface Props {
   loading?: boolean;
   text: string;
   theme?: "primary" | "secondary";
+  style?: ViewStyle;
 }
 
 export default function Button({
@@ -14,10 +20,11 @@ export default function Button({
   loading,
   text,
   theme = "primary",
+  style,
 }: Props) {
   return (
     <TouchableOpacity
-      style={styles[theme].container}
+      style={[styles[theme].container, style]}
       onPress={() => {
         if (!loading) {
           onPress && onPress();

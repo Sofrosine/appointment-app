@@ -3,7 +3,7 @@ import { colors } from "../styles/Theme";
 import { Feather, Ionicons } from "@expo/vector-icons";
 
 //ICONS
-const iconPref = ({ route }) => {
+const iconPref: any = ({ route }) => {
   return {
     tabBarIcon: ({ color }) => {
       let iconName;
@@ -16,6 +16,10 @@ const iconPref = ({ route }) => {
         iconName = "calendar";
       } else if (route.name === "Search") {
         iconName = "search";
+      } else if (route.name === "Doctor") {
+        iconName = "briefcase";
+      } else if (route.name === "Category") {
+        iconName = "grid";
       }
       //returns in each icon
       return <Feather name={iconName} size={30} color={color} />;

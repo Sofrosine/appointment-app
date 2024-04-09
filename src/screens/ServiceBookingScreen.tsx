@@ -1,29 +1,27 @@
 import {
-  View,
-  StyleSheet,
-  Text,
+  ActivityIndicator,
+  Alert,
   Image,
   ScrollView,
-  Alert,
-  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
-import React, { useState, useEffect, useRef } from "react";
-import { Calendar } from "react-native-calendars";
+import { child, get, getDatabase, push, ref } from "firebase/database";
 import moment from "moment";
-import { colors } from "../styles/Theme";
-import { getDatabase, push, ref, get, child, update } from "firebase/database";
-import { showTopMessage } from "../utils/ErrorHandler";
+import React, { useEffect, useRef, useState } from "react";
+import { Calendar } from "react-native-calendars";
+import { app, getAuth } from "../../firebaseConfig";
+import Button from "../components/Button";
 import TimeSlot from "../components/TimeSlot";
-import parseContentData from "../utils/ParseContentData";
-import { Ionicons } from "@expo/vector-icons";
+import { colors } from "../styles/Theme";
+import { showTopMessage } from "../utils/ErrorHandler";
 import {
   configureNotifications,
   handleNotification,
 } from "../utils/NotificationService";
-import userImages from "../utils/UserImageUtils";
-import { app, getAuth } from "../../firebaseConfig";
-import Button from "../components/Button";
+import parseContentData from "../utils/ParseContentData";
 
 const auth = getAuth(app);
 
@@ -145,7 +143,7 @@ export default function ServiceBookingScreen({ route, navigation }) {
     } else {
       if (!user) {
         showTopMessage("You are not logged in", "success");
-        goToLoginScreen();
+        goToSignInScreen();
       } else if (!selectedDate || !selectedTime) {
         showTopMessage("Please select a date and a time.", "info");
       }
@@ -210,8 +208,8 @@ export default function ServiceBookingScreen({ route, navigation }) {
     navigation.navigate("SearchScreen");
   };
 
-  const goToLoginScreen = () => {
-    navigation.navigate("LoginScreen");
+  const goToSignInScreen = () => {
+    navigation.navigate("SignInScreen");
   };
 
   return (

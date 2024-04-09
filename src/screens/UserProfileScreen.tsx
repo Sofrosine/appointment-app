@@ -12,7 +12,6 @@ import { useAppSelector } from "../hooks";
 export default function UserProfileScreen({ navigation }) {
   const { data: userData } = useAppSelector((state) => state.authReducer) || {};
 
-
   // Sign out user
   function handleSignOut() {
     const auth = getAuth(app);
@@ -20,14 +19,14 @@ export default function UserProfileScreen({ navigation }) {
     signOut(auth)
       .then((res) => {
         showTopMessage("Session ended", "success");
-        goToLogin();
+        goToSignIn();
       })
       .catch((err) => console.log(err));
   }
 
   // Navigation
-  function goToLogin() {
-    navigation.navigate("LoginScreen");
+  function goToSignIn() {
+    navigation.navigate("SignInScreen");
   }
 
   // Navigation
@@ -47,7 +46,7 @@ export default function UserProfileScreen({ navigation }) {
             </Text>
             <Text style={styles.desc}>{userData?.email}</Text>
           </View>
-          <UploadImage />
+          <UploadImage onSelect={() => {}} />
         </View>
 
         <CardSmall iconName={"user"} text={"My Account"} />

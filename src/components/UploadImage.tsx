@@ -1,22 +1,47 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import React, { FC, useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ImageSourcePropType,
+} from "react-native";
 import { colors } from "../styles/Theme";
 import * as ImagePicker from "expo-image-picker";
+import { Image } from "expo-image";
 
-const UploadImage = () => {
+interface Props {
+  onSelect: (img: ImagePicker.ImagePickerAsset) => void;
+  placeholderImage?: ImageSourcePropType;
+  defaultImage?: string;
+}
+
+const UploadImage: FC<Props> = ({
+  onSelect,
+  defaultImage,
+  placeholderImage = require("../../assets/user-profile.png"),
+}) => {
   const [image, setImage] = useState(null);
+
+  useEffect(() => {
+    if (defaultImage) {
+      setImage(defaultImage);
+    }
+  }, [defaultImage]);
 
   const addImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 0.5,
     });
-    if (!result.cancelled) {
-      setImage(result.uri);
-    } else {
-      alert("You did not select any image.");
+
+    console.log(result);
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+      onSelect && onSelect(result.assets[0]);
     }
   };
 
@@ -25,10 +50,7 @@ const UploadImage = () => {
       {image ? (
         <Image source={{ uri: image }} style={styles.image} />
       ) : (
-        <Image
-          source={require("../../assets/user-profile.png")}
-          style={styles.image}
-        />
+        <Image source={placeholderImage} style={styles.image} />
       )}
       <View style={styles.uploadButtonContainer}>
         <TouchableOpacity onPress={addImage} style={styles.uploadButton}>

@@ -10,6 +10,7 @@ import InputBar from "../components/InputBar";
 import { setUser } from "../store/slices/auth";
 import ErrorHandler, { showTopMessage } from "../utils/ErrorHandler";
 import Button from "../components/Button";
+import { ROLES } from "../constants";
 
 const initialFormValues = {
   first_name: "",
@@ -46,6 +47,7 @@ export default function SignUpScreen() {
             last_name: formValues.last_name,
             email: formValues.email,
             image_url: "",
+            role: ROLES.USER,
           };
 
           // Write to the database

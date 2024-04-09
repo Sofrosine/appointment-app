@@ -1,4 +1,4 @@
-import { showMessage } from "react-native-flash-message";
+import { MessageType, showMessage } from "react-native-flash-message";
 
 export default function (errorCode) {
   switch (errorCode) {
@@ -31,7 +31,7 @@ export default function (errorCode) {
   }
 }
 
-export function showTopMessage(messageText, messageType) {
+export function showTopMessage(messageText: string, messageType: MessageType) {
   showMessage({
     message: messageText,
     type: messageType,

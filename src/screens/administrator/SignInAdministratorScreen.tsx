@@ -1,32 +1,33 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import InputBar from "../components/InputBar";
+import InputBar from "../../components/InputBar";
 import {
   browserLocalPersistence,
   getAuth,
   signInWithEmailAndPassword,
+  signOut,
 } from "firebase/auth";
-import { app } from "../../firebaseConfig";
+import { app } from "../../../firebaseConfig";
 import { Formik } from "formik";
-import ErrorHandler, { showTopMessage } from "../utils/ErrorHandler";
-import { colors } from "../styles/Theme";
+import ErrorHandler, { showTopMessage } from "../../utils/ErrorHandler";
+import { colors } from "../../styles/Theme";
 import { getDatabase, onValue, ref } from "firebase/database";
 import { useDispatch } from "react-redux";
-import { setUser } from "../store/slices/auth";
-import Button from "../components/Button";
+import { setUser } from "../../store/slices/auth";
+import Button from "../../components/Button";
 
 const initialFormValues = {
   usermail: "",
   password: "",
 };
 
-const LoginScreen = ({ navigation }) => {
+const auth = getAuth(app);
+
+const SignInAdministratorScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
 
   function handleFormSubmit(formValues) {
-    const auth = getAuth(app);
-
     setLoading(true); // Enable loading when the process starts
 
     signInWithEmailAndPassword(auth, formValues.usermail, formValues.password)
@@ -49,7 +50,12 @@ const LoginScreen = ({ navigation }) => {
       (snapshot) => {
         if (snapshot.exists()) {
           const userData = snapshot.val();
-          storeData(userData); // Store data in AsyncStorage
+          if (userData?.role === "admin") {
+            storeData(userData); // Store data in AsyncStorage
+          } else {
+            signOut(auth);
+            showTopMessage("You are forbidden", "danger");
+          }
         } else {
           console.log("User data not found.");
         }
@@ -64,7 +70,7 @@ const LoginScreen = ({ navigation }) => {
     try {
       // await AsyncStorage.setItem("@user_data", JSON.stringify(userData));
       dispatch(setUser({ data: userData }));
-      showTopMessage("Login Successful!", "success");
+      showTopMessage("SignIn Successful!", "success");
       setLoading(false);
       goToUserProfile();
     } catch (error) {
@@ -88,7 +94,7 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}> Log In </Text>
+      <Text style={styles.text}> Sign In Administrator</Text>
       <Formik initialValues={initialFormValues} onSubmit={handleFormSubmit}>
         {({ values, handleChange, handleSubmit }) => (
           <>
@@ -104,23 +110,34 @@ const LoginScreen = ({ navigation }) => {
                 placeholder={"Password"}
                 secureTextEntry
               />
-              <TouchableOpacity style={styles.button}>
-                <Text style={styles.detail}>Forgot Password?</Text>
-              </TouchableOpacity>
+              <View
+                style={{
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexDirection: "row",
+                }}
+              >
+                <TouchableOpacity style={styles.button}>
+                  <Text style={styles.detail}>Forgot Password?</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.button}>
+                  <Text
+                    style={[
+                      styles.detail,
+                      { color: colors.color_primary, fontWeight: "bold" },
+                    ]}
+                  >
+                    Sign in as administrator
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
             <View style={styles.button_container}>
               <View style={styles.button}>
                 <Button
-                  text="Log In"
+                  text="Sign In"
                   onPress={handleSubmit}
                   loading={loading}
-                />
-              </View>
-              <View style={styles.button}>
-                <Button
-                  text="Sign Up"
-                  onPress={goToMemberSignUp}
-                  theme="secondary"
                 />
               </View>
             </View>
@@ -157,4 +174,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+export default SignInAdministratorScreen;

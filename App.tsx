@@ -1,8 +1,3 @@
-import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { useFonts } from "expo-font";
-import FlashMessage from "react-native-flash-message";
-import Fonts from "./src/styles/Fonts";
 import {
   Mulish_300Light,
   Mulish_400Regular,
@@ -11,9 +6,13 @@ import {
   Mulish_700Bold,
   Mulish_900Black,
 } from "@expo-google-fonts/mulish";
-import Navigation from "./src/components/Navigation";
+import { NavigationContainer } from "@react-navigation/native";
+import { useFonts } from "expo-font";
+import React from "react";
+import FlashMessage from "react-native-flash-message";
 import { MenuProvider } from "react-native-popup-menu";
 import { Provider } from "react-redux";
+import Router from "./src/routes";
 import { store } from "./src/store";
 
 export default function App() {
@@ -34,7 +33,7 @@ export default function App() {
     <MenuProvider>
       <Provider store={store}>
         <NavigationContainer>
-          <Navigation />
+          <Router />
           <FlashMessage position="top" />
         </NavigationContainer>
       </Provider>

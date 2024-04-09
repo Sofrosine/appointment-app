@@ -15,9 +15,6 @@ import categories from "../utils/Categories";
 import Category from "../components/Category";
 import { showTopMessage } from "../utils/ErrorHandler";
 import parseContentData from "../utils/ParseContentData";
-import userImages from "../utils/UserImageUtils";
-import { app } from "../../firebaseConfig";
-import { Ionicons } from "@expo/vector-icons";
 
 export default function SearchScreen({ navigation, route }) {
   const [loading, setLoading] = useState(true);
@@ -82,7 +79,7 @@ export default function SearchScreen({ navigation, route }) {
 
   const renderService = ({ item }) => (
     <CardMedium
-      image_source={userImages[item.id]}
+      image_source={item?.image_url}
       service={item}
       key={item.id}
       onSelect={() => handleServiceSelect(item)}
