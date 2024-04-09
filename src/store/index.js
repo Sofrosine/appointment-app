@@ -28,7 +28,7 @@ export const store = configureStore({
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     }),
-  enhancers: [],
+//   enhancers: [],
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
