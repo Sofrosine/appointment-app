@@ -9,7 +9,6 @@ export default function InputBar(props) {
         {...props}
         style={{ fontSize: 14, fontFamily: "Mulish_500Medium" }}
         placeholderTextColor={colors.color_gray}
-        secureTextEntry={props.isSecure}
       />
     </View>
   );

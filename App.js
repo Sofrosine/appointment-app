@@ -13,6 +13,8 @@ import {
 } from "@expo-google-fonts/mulish";
 import Navigation from "./src/components/Navigation";
 import { MenuProvider } from "react-native-popup-menu";
+import { Provider } from "react-redux";
+import { store } from "./src/store";
 
 export default function App() {
   //font
@@ -30,10 +32,12 @@ export default function App() {
   }
   return (
     <MenuProvider>
-      <NavigationContainer>
-        <Navigation />
-        <FlashMessage position="top" />
-      </NavigationContainer>
+      <Provider store={store}>
+        <NavigationContainer>
+          <Navigation />
+          <FlashMessage position="top" />
+        </NavigationContainer>
+      </Provider>
     </MenuProvider>
   );
 }

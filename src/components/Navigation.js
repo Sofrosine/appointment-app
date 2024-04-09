@@ -20,6 +20,7 @@ import iconPref, { customTabButton } from "../utils/NavBarUtils";
 import { useState } from "react";
 import { useEffect } from "react";
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -148,16 +149,18 @@ function MapStack() {
   );
 }
 
-const auth = getAuth(app)
+const auth = getAuth(app);
 export default Navigation = () => {
-  const [user, setUser] = useState({});
+  const [user, setUser] = useState(null);
 
   // check authentication
   useEffect(() => {
+    const a = async () => {
+      console.log(await AsyncStorage.getAllKeys());
+    };
+    a();
     auth?.onAuthStateChanged(async (user) => {
-      if (user) {
-        setUser(!!user);
-      }
+      setUser(user);
     });
   }, []);
 
@@ -170,11 +173,11 @@ export default Navigation = () => {
       <Tab.Navigator screenOptions={iconPref} initialRouteName="Home">
         <Tab.Screen name="Home" component={HomeStack} />
         <Tab.Screen name="Search" component={SearchStack} />
-        <Tab.Screen
+        {/* <Tab.Screen
           name="Map"
           component={MapStack}
           options={{ tabBarButton: customTabButton }}
-        />
+        /> */}
         <Tab.Screen
           name="Appointments"
           component={getTabScreen(CalendarScreen, AuthStack)}

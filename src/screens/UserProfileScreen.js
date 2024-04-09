@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { getAuth, signOut } from "firebase/auth";
-import { app } from "../../firebaseConfig";
+import { signOut } from "firebase/auth";
+import { app, getAuth } from "../../firebaseConfig";
 import { Feather } from "@expo/vector-icons";
 import CardSmall from "../components/CardSmall";
 import { showTopMessage } from "../utils/ErrorHandler";

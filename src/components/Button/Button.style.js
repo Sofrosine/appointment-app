@@ -5,6 +5,7 @@ const style_base = StyleSheet.create({
     container: {
         borderRadius: 20,
         padding: 8,
+        paddingVertical: 4,
         flex: 1,
         justifyContent:"center",
         shadowColor: colors.color_gray,

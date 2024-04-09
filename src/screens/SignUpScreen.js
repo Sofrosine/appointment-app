@@ -8,13 +8,17 @@ import {
 } from "react-native";
 import Button from "../components/Button/Button";
 import InputBar from "../components/InputBar";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import app from "../../firebaseConfig";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { app, getAuth } from "../../firebaseConfig";
 import { Formik } from "formik";
 import ErrorHandler, { showTopMessage } from "../utils/ErrorHandler";
+import { getDatabase, ref, set } from "firebase/database";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const initialFormValues = {
-  usermail: "",
+  first_name: "",
+  last_name: "",
+  email: "",
   password: "",
   passwordre: "",
 };
@@ -25,27 +29,57 @@ export default function SignUpScreen() {
   function handleFormSubmit(formValues) {
     const auth = getAuth(app);
 
-    setLoading(true);
-
     if (formValues.password !== formValues.passwordre) {
       showTopMessage("Passwords do not match, please try again!", "warning");
       setLoading(false);
     } else {
+      setLoading(true);
       createUserWithEmailAndPassword(
         auth,
-        formValues.usermail,
+        formValues.email,
         formValues.password
       )
-        .then(
-          (res) => {
-            showTopMessage("Registration successful!", "success");
-            setLoading(false);
-          }
-          // navigate to home screen or go back from here
-        )
-        .catch((err) => showTopMessage(ErrorHandler(err.code), "danger"));
+        .then((userCredential) => {
+          const user = userCredential?.user;
+          const uid = user?.uid;
 
-      setLoading(false);
+          // Prepare user data
+          const userData = {
+            first_name: formValues.first_name,
+            last_name: formValues.last_name,
+            email: formValues.email,
+            image_url: "",
+          };
+
+          // Write to the database
+          set(ref(getDatabase(), "users/" + uid), userData)
+            .then(async () => {
+              await AsyncStorage.setItem(
+                "@user_data",
+                JSON.stringify(userData)
+              );
+              showTopMessage("Registration successful!", "success");
+              setLoading(false);
+              // Consider navigating to the user profile or home screen.
+            })
+            .catch((error) => {
+              showTopMessage("Error saving user data", "danger");
+              console.error(error);
+              // Delete the created user
+              userCredential?.user
+                .delete()
+                .then(() => {
+                  showTopMessage("Registration rolled back.", "warning");
+                })
+                .catch((deleteError) => {
+                  // Handle error during deletion (e.g., log the error)
+                  console.error("Error deleting user:", deleteError);
+                });
+
+              setLoading(false);
+            });
+        })
+        .catch((err) => showTopMessage(ErrorHandler(err?.code), "danger"));
     }
   }
 
@@ -56,17 +90,20 @@ export default function SignUpScreen() {
         {({ values, handleChange, handleSubmit }) => (
           <>
             <View style={styles.input_container}>
-              <InputBar placeholder={"First Name"} />
-              <InputBar placeholder={"Last Name"} />
               <InputBar
-                onChangeText={handleChange("usermail")}
-                value={values.usermail}
-                placeholder={"Email Address"}
+                onChangeText={handleChange("first_name")}
+                value={values.first_name}
+                placeholder={"First Name"}
               />
               <InputBar
-                onChangeText={handleChange("phoneNumber")}
-                value={values.phoneNumber}
-                placeholder={"Phone Number"}
+                onChangeText={handleChange("last_name")}
+                value={values.last_name}
+                placeholder={"Last Name"}
+              />
+              <InputBar
+                onChangeText={handleChange("email")}
+                value={values.email}
+                placeholder={"Email Address"}
               />
               <InputBar
                 onChangeText={handleChange("password")}
