@@ -1,8 +1,10 @@
-import React from "react";
-import { StyleSheet, TextInput, View } from "react-native";
+import React, { FC } from "react";
+import { StyleSheet, TextInput, TextInputProps, View } from "react-native";
 import { colors } from "../styles/Theme";
 
-export default function InputBar(props) {
+interface Props extends TextInputProps {}
+
+const InputBar: FC<Props> = (props) => {
   return (
     <View style={styles.container}>
       <TextInput
@@ -12,7 +14,9 @@ export default function InputBar(props) {
       />
     </View>
   );
-}
+};
+
+export default InputBar;
 
 const styles = StyleSheet.create({
   container: {

@@ -1,11 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-// type InitGLobalProps = {
-//   data: any,
-//   token: string,
-// };
+type InitGLobalProps = {
+  data: any;
+};
 
-const initialState = {
+const initialState: InitGLobalProps = {
   data: null,
 };
 

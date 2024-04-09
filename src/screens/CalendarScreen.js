@@ -1,5 +1,5 @@
 import { child, get, getDatabase, ref, remove } from "firebase/database";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import {
   handleNotification,
 } from "../utils/NotificationService";
 import { app, getAuth } from "../../firebaseConfig";
+import { useFocusEffect } from "@react-navigation/native";
 
 const auth = getAuth(app);
 export default function CalendarScreen() {
@@ -31,20 +32,22 @@ export default function CalendarScreen() {
   }, []);
 
   // Fetch user appointments from the database
-  useEffect(() => {
-    fetchData();
-  }, [appointmentList]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
 
   const fetchData = () => {
     const dbRef = ref(getDatabase());
 
-    get(child(dbRef, "userAppointments/" + user?.uid))
+    get(child(dbRef, "appointments/" + user?.uid))
       .then((snapshot) => {
         if (snapshot.exists()) {
           const data = parseContentData(snapshot?.val());
 
           const servicePromises = data?.map((appointment) =>
-            fetchServiceInfo(appointment.serviceId)
+            fetchDoctors(appointment?.doctor_id)
           );
 
           // Wait for all promises to resolve
@@ -70,8 +73,8 @@ export default function CalendarScreen() {
       });
   };
 
-  async function fetchServiceInfo(id) {
-    const dbRef = ref(getDatabase(), "services/" + id);
+  async function fetchDoctors(id) {
+    const dbRef = ref(getDatabase(), "doctors/" + id);
 
     return get(dbRef)
       .then((snapshot) => {
@@ -90,7 +93,7 @@ export default function CalendarScreen() {
   function removeAppointment(appointment) {
     const appointmentsRef = ref(
       getDatabase(),
-      "userAppointments/" + user.uid + "/" + appointment.id
+      "appointments/" + user.uid + "/" + appointment.id
     );
 
     remove(appointmentsRef)
@@ -98,7 +101,7 @@ export default function CalendarScreen() {
         showTopMessage("Appointment deleted!", "success");
         handleNotification(
           "Appointment Canceled",
-          `${appointment.appType} appointment has been canceled.`
+          `${appointment?.type} appointment has been canceled.`
         );
         if (appointmentList.length == 1) {
           setAppointmentList([]);
@@ -144,10 +147,10 @@ export default function CalendarScreen() {
             <Text style={styles.emptyViewText}>No appointments found!</Text>
           ) : (
             <View>
-              {appointmentList.map((appointment) => (
+              {appointmentList?.map((appointment) => (
                 <CardAppointment
                   appointment={appointment}
-                  serviceInfo={appointment.serviceInfo}
+                  serviceInfo={appointment?.serviceInfo}
                   key={appointment.id}
                   onPressCancel={() => handleCancel(appointment)}
                 />

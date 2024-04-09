@@ -1,17 +1,16 @@
+import { Feather } from "@expo/vector-icons";
 import React from "react";
 import {
-  View,
-  StyleSheet,
-  Text,
   Image,
   ScrollView,
   Share,
+  StyleSheet,
+  Text,
   TouchableOpacity,
+  View,
 } from "react-native";
-import Button from "../components/Button/Button";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import Button from "../components/Button";
 import { colors, sizes } from "../styles/Theme";
-import userImages from "../utils/UserImageUtils";
 
 export default function ServiceDetailScreen({ route, navigation }) {
   const { item } = route.params || {};

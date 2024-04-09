@@ -1,9 +1,15 @@
-import React from "react";
+import React, { FC } from "react";
 import { Image, StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { colors } from "../styles/Theme";
 import { Feather } from "@expo/vector-icons";
 
-export default function CardSmall({ text, iconName, onSelect }) {
+interface Props {
+  text: string;
+  iconName: any;
+  onSelect?: () => void;
+}
+
+const CardSmall: FC<Props> = ({ iconName, text, onSelect }) => {
   return (
     <TouchableOpacity onPress={onSelect}>
       <View style={styles.card}>
@@ -21,7 +27,9 @@ export default function CardSmall({ text, iconName, onSelect }) {
       </View>
     </TouchableOpacity>
   );
-}
+};
+
+export default CardSmall;
 
 const styles = StyleSheet.create({
   card: {

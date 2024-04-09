@@ -1,14 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { configureStore } from "@reduxjs/toolkit";
 import {
-    FLUSH,
-    PAUSE,
-    PERSIST,
-    persistReducer,
-    persistStore,
-    PURGE,
-    REGISTER,
-    REHYDRATE
+  FLUSH,
+  PAUSE,
+  PERSIST,
+  Persistor,
+  persistReducer,
+  persistStore,
+  PURGE,
+  REGISTER,
+  REHYDRATE,
 } from "redux-persist";
 import appReducer from "./reducers";
 
@@ -28,13 +29,11 @@ export const store = configureStore({
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     }),
-//   enhancers: [],
+  //   enhancers: [],
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
-// export type RootState = ReturnType<typeof store.getState>;
+export type RootState = ReturnType<typeof store.getState>;
 // // Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
-// export type AppDispatch = typeof store.dispatch;
-// export const persistor: Persistor = persistStore(store);
-
-export const persistor = persistStore(store);
+export type AppDispatch = typeof store.dispatch;
+export const persistor: Persistor = persistStore(store);

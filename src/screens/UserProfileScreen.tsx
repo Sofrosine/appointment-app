@@ -7,14 +7,11 @@ import CardSmall from "../components/CardSmall";
 import { showTopMessage } from "../utils/ErrorHandler";
 import { colors } from "../styles/Theme";
 import UploadImage from "../components/UploadImage";
+import { useAppSelector } from "../hooks";
 
 export default function UserProfileScreen({ navigation }) {
-  const userInfo = {
-    id: 0,
-    firstName: "Zehra",
-    lastName: "Güneş",
-    district: "Ataşehir",
-  };
+  const { data: userData } = useAppSelector((state) => state.authReducer) || {};
+
 
   // Sign out user
   function handleSignOut() {
@@ -46,9 +43,9 @@ export default function UserProfileScreen({ navigation }) {
         <View style={styles.user_card}>
           <View style={styles.title_container}>
             <Text style={styles.title}>
-              {userInfo.firstName} {userInfo.lastName}
+              {userData?.first_name} {userData?.last_name}
             </Text>
-            <Text style={styles.desc}>{userInfo.district}</Text>
+            <Text style={styles.desc}>{userData?.email}</Text>
           </View>
           <UploadImage />
         </View>

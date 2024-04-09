@@ -7,7 +7,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import Button from "../components/Button/Button";
+
 import React, { useState, useEffect, useRef } from "react";
 import { Calendar } from "react-native-calendars";
 import moment from "moment";
@@ -23,91 +23,26 @@ import {
 } from "../utils/NotificationService";
 import userImages from "../utils/UserImageUtils";
 import { app, getAuth } from "../../firebaseConfig";
+import Button from "../components/Button";
 
 const auth = getAuth(app);
 
 export default function ServiceBookingScreen({ route, navigation }) {
   const { item } = route.params || {};
-  const serviceId = item?.id;
+  const doctorId = item?.id;
   const scrollViewRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [timeList, setTimeList] = useState([]);
-  const [serviceTimeList, setServiceTimeList] = useState([]);
+  const [doctorTimeList, setDoctorTimeList] = useState([]);
   const [bookedApps, setBookedApps] = useState([]);
 
   const today = moment().format("YYYY-MM-DD");
   const threeMonthsLater = moment().add(3, "months").format("YYYY-MM-DD");
 
   const user = auth?.currentUser;
-
-  const getTimeListFromDatabase = async () => {
-    setLoading(true);
-    try {
-      const dbRef = ref(getDatabase());
-      const snapshot = await get(child(dbRef, "times"));
-
-      if (snapshot.exists()) {
-        const timeList = parseContentData(snapshot.val());
-        setTimeList(timeList);
-      } else {
-        console.log("No data");
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getServiceAppointments = async (day) => {
-    setLoading(true);
-    setServiceTimeList([]);
-    try {
-      const appointmentsRef = ref(getDatabase(), "userAppointments");
-      const snapshot = await get(appointmentsRef);
-
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        let serviceBookings = [];
-
-        Object.keys(data).forEach((user) => {
-          const userAppointments = data[user];
-
-          Object.keys(userAppointments).forEach((appointmentId) => {
-            const app = userAppointments[appointmentId];
-
-            if (app.serviceId === serviceId && app.bookedDate === day) {
-              serviceBookings.push(app);
-            }
-          });
-        });
-
-        setBookedApps(serviceBookings);
-        const availableTimes = timeList.map((time) => {
-          const bookedHour = serviceBookings.some(
-            (app) => app.bookedTime === time.apptime
-          );
-
-          return {
-            ...time,
-            isBooked: bookedHour ? true : false,
-          };
-        });
-
-        setServiceTimeList(availableTimes);
-      } else {
-        console.log("No data");
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-      return true;
-    }
-  };
 
   useEffect(() => {
     configureNotifications();
@@ -120,6 +55,74 @@ export default function ServiceBookingScreen({ route, navigation }) {
 
     fetchData();
   }, [selectedDate]);
+
+  const getTimeListFromDatabase = async () => {
+    setLoading(true);
+    try {
+      const dbRef = ref(getDatabase());
+      const snapshot = await get(child(dbRef, "times"));
+
+      if (snapshot.exists()) {
+        const timeList = parseContentData(snapshot.val());
+        setTimeList(timeList);
+      } else {
+        console.log("No data time list");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getServiceAppointments = async (day) => {
+    setLoading(true);
+    setDoctorTimeList([]);
+
+    try {
+      const appointmentsRef = ref(getDatabase(), "appointments");
+      const snapshot = await get(appointmentsRef);
+
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        let serviceBookings = [];
+
+        Object.keys(data).forEach((user) => {
+          const appointments = data[user];
+          console.log("he", appointments);
+          Object.keys(appointments).forEach((appointmentId) => {
+            const app = appointments[appointmentId];
+
+            if (app?.doctor_id === doctorId && app?.booked_date === day) {
+              serviceBookings.push(app);
+            }
+          });
+        });
+
+        setBookedApps(serviceBookings);
+
+        const availableTimes = timeList?.map((time) => {
+          const bookedHour = serviceBookings.some(
+            (app) => app?.booked_time === time?.app_time
+          );
+
+          return {
+            ...time,
+            is_booked: bookedHour ? true : false,
+          };
+        });
+        console.log("avail", availableTimes);
+        setDoctorTimeList(availableTimes);
+      } else {
+        console.log("No data");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+      return true;
+    }
+  };
 
   const handleBooking = () => {
     if (selectedDate && selectedTime && user) {
@@ -151,19 +154,19 @@ export default function ServiceBookingScreen({ route, navigation }) {
 
   const pushAppointment = () => {
     const userId = user.uid;
-    const serviceId = item?.id;
-    const appType = item?.expert_area;
+    const doctorId = item?.id;
+    const type = item?.expert_area;
     const bookedDate = selectedDate;
     const bookedTime = selectedTime;
 
-    const appointmentsRef = ref(getDatabase(), "userAppointments/" + user.uid);
+    const appointmentsRef = ref(getDatabase(), "appointments/" + user?.uid);
 
     push(appointmentsRef, {
-      userId,
-      serviceId,
-      appType,
-      bookedDate,
-      bookedTime,
+      user_id: userId,
+      doctor_id: doctorId,
+      type,
+      booked_date: bookedDate,
+      booked_time: bookedTime,
     })
       .then(async () => {
         showTopMessage("Your appointment has been created!", "success");
@@ -187,10 +190,10 @@ export default function ServiceBookingScreen({ route, navigation }) {
   const onDateSelect = async (day) => {
     try {
       setLoading(true);
-      setSelectedDate(day.dateString);
+      setSelectedDate(day?.dateString);
 
       const timeListData = await getTimeListFromDatabase();
-      const appsForDay = await getServiceAppointments(day.dateString);
+      const appsForDay = await getServiceAppointments(day?.dateString);
     } catch (error) {
       console.error(error);
     } finally {
@@ -199,6 +202,7 @@ export default function ServiceBookingScreen({ route, navigation }) {
   };
 
   const onTimeSelect = (time) => {
+    console.log(time);
     setSelectedTime(time);
   };
 
@@ -273,20 +277,20 @@ export default function ServiceBookingScreen({ route, navigation }) {
         {selectedDate && (
           <View style={styles.bottom_container}>
             {loading ? (
-              <ActivityIndicator style={styles.loadingIndicator} />
+              <ActivityIndicator />
             ) : (
               <>
                 <View style={styles.text_container}>
                   <Text style={styles.subTitle}>Select Time:</Text>
                 </View>
                 <View style={styles.time_container}>
-                  {serviceTimeList.map((time) => (
+                  {doctorTimeList?.map((time) => (
                     <TimeSlot
-                      key={time.id.toString()}
+                      key={time?.id?.toString()}
                       time={time}
                       onPress={onTimeSelect}
-                      isSelected={selectedTime === time.apptime}
-                      isBooked={time.isBooked}
+                      isSelected={selectedTime === time?.app_time}
+                      isBooked={time?.is_booked}
                     />
                   ))}
                 </View>

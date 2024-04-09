@@ -1,16 +1,19 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import Button from "../components/Button/Button";
 import InputBar from "../components/InputBar";
 import {
   browserLocalPersistence,
   getAuth,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import app from "../../firebaseConfig";
+import { app } from "../../firebaseConfig";
 import { Formik } from "formik";
 import ErrorHandler, { showTopMessage } from "../utils/ErrorHandler";
 import { colors } from "../styles/Theme";
+import { getDatabase, onValue, ref } from "firebase/database";
+import { useDispatch } from "react-redux";
+import { setUser } from "../store/slices/auth";
+import Button from "../components/Button";
 
 const initialFormValues = {
   usermail: "",
@@ -19,6 +22,7 @@ const initialFormValues = {
 
 const LoginScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   function handleFormSubmit(formValues) {
     const auth = getAuth(app);
@@ -26,16 +30,49 @@ const LoginScreen = ({ navigation }) => {
     setLoading(true); // Enable loading when the process starts
 
     signInWithEmailAndPassword(auth, formValues.usermail, formValues.password)
-      .then((res) => {
-        showTopMessage("Login Successful!", "success");
-        setLoading(false); // Disable loading when the process completes
-        goToUserProfile();
+      .then((userCredential) => {
+        const uid = userCredential?.user.uid;
+        fetchUserData(uid);
       })
       .catch((err) => {
         setLoading(false);
         showTopMessage(ErrorHandler(err.code), "danger");
       });
   }
+
+  const fetchUserData = (uid) => {
+    const database = getDatabase(app);
+    const userRef = ref(database, "users/" + uid);
+
+    onValue(
+      userRef,
+      (snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          storeData(userData); // Store data in AsyncStorage
+        } else {
+          console.log("User data not found.");
+        }
+      },
+      {
+        onlyOnce: true, // Fetch the data only once
+      }
+    );
+  };
+
+  const storeData = async (userData) => {
+    try {
+      // await AsyncStorage.setItem("@user_data", JSON.stringify(userData));
+      dispatch(setUser({ data: userData }));
+      showTopMessage("Login Successful!", "success");
+      setLoading(false);
+      goToUserProfile();
+    } catch (error) {
+      console.error("Error saving to AsyncStorage: ", error);
+      showTopMessage("Error storing data", "danger");
+      setLoading(false);
+    }
+  };
 
   // Navigation
 
@@ -55,7 +92,7 @@ const LoginScreen = ({ navigation }) => {
       <Formik initialValues={initialFormValues} onSubmit={handleFormSubmit}>
         {({ values, handleChange, handleSubmit }) => (
           <>
-            <View style={styles.input_container}>
+            <View>
               <InputBar
                 onChangeText={handleChange("usermail")}
                 value={values.usermail}
@@ -65,7 +102,7 @@ const LoginScreen = ({ navigation }) => {
                 onChangeText={handleChange("password")}
                 value={values.password}
                 placeholder={"Password"}
-                isSecure
+                secureTextEntry
               />
               <TouchableOpacity style={styles.button}>
                 <Text style={styles.detail}>Forgot Password?</Text>

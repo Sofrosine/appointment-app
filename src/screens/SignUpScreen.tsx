@@ -1,19 +1,15 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-} from "react-native";
-import Button from "../components/Button/Button";
-import InputBar from "../components/InputBar";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { app, getAuth } from "../../firebaseConfig";
-import { Formik } from "formik";
-import ErrorHandler, { showTopMessage } from "../utils/ErrorHandler";
 import { getDatabase, ref, set } from "firebase/database";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Formik } from "formik";
+import { useDispatch } from "react-redux";
+import { app, getAuth } from "../../firebaseConfig";
+import InputBar from "../components/InputBar";
+import { setUser } from "../store/slices/auth";
+import ErrorHandler, { showTopMessage } from "../utils/ErrorHandler";
+import Button from "../components/Button";
 
 const initialFormValues = {
   first_name: "",
@@ -25,6 +21,7 @@ const initialFormValues = {
 
 export default function SignUpScreen() {
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   function handleFormSubmit(formValues) {
     const auth = getAuth(app);
@@ -54,10 +51,11 @@ export default function SignUpScreen() {
           // Write to the database
           set(ref(getDatabase(), "users/" + uid), userData)
             .then(async () => {
-              await AsyncStorage.setItem(
-                "@user_data",
-                JSON.stringify(userData)
-              );
+              // await AsyncStorage.setItem(
+              //   "@user_data",
+              //   JSON.stringify(userData)
+              // );
+              dispatch(setUser({ data: userData }));
               showTopMessage("Registration successful!", "success");
               setLoading(false);
               // Consider navigating to the user profile or home screen.

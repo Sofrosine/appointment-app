@@ -7,7 +7,7 @@ const TimeSlot = ({ time, onPress, isSelected, isBooked }) => {
 
   const handlePress = () => {
     if (!isBooked) {
-      onPress(time.apptime);
+      onPress(time?.app_time);
     }
   };
 
@@ -49,7 +49,7 @@ const TimeSlot = ({ time, onPress, isSelected, isBooked }) => {
           isBooked && styles.bookedText,
         ]}
       >
-        {time.apptime}
+        {time?.app_time}
       </Animated.Text>
     </TouchableOpacity>
   );

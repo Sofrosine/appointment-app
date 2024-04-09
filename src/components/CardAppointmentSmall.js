@@ -7,20 +7,24 @@ export default function CardAppointmentSmall({
   serviceInfo,
   onPress,
 }) {
-  const { appType, bookedDate, bookedTime } = appointment;
+  const {
+    type,
+    booked_date: bookedDate,
+    booked_time: bookedTime,
+  } = appointment;
 
-  const fullName = serviceInfo.firstName + " " + serviceInfo.lastName;
+  const fullName = serviceInfo?.first_name + " " + serviceInfo?.last_name;
 
   const formattedDate = new Date(bookedDate);
-  const day = formattedDate.getDate();
-  const month = formattedDate.toLocaleString("default", { month: "short" });
+  const day = formattedDate?.getDate();
+  const month = formattedDate?.toLocaleString("default", { month: "short" });
 
   return (
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity activeOpacity={1} onPress={onPress}>
       <View style={styles.container}>
         <View style={styles.info_container}>
           <Text style={styles.appType}>
-            {appType}, {fullName}
+            {type}, {fullName}
           </Text>
           <Text style={styles.time}>
             {bookedTime}, {day} {month}
@@ -55,6 +59,7 @@ const styles = StyleSheet.create({
     fontFamily: "Mulish_500Medium",
     fontSize: 14,
     padding: 4,
+    textTransform: "capitalize",
   },
   time: {
     fontFamily: "Mulish_500Medium",
