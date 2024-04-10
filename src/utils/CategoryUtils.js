@@ -4,7 +4,7 @@ export const filterServicesByCategory = (category, serviceList) => {
   } else {
     const filteredList = serviceList?.filter(
       (service) =>
-        service?.expert_area?.toLowerCase() === category.toLowerCase()
+        service?.expert_area?.name?.toLowerCase() === category.toLowerCase()
     );
     return filteredList;
   }

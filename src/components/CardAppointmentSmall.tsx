@@ -24,7 +24,7 @@ export default function CardAppointmentSmall({
       <View style={styles.container}>
         <View style={styles.info_container}>
           <Text style={styles.appType}>
-            {type}, {fullName}
+            {type?.name}, {fullName}
           </Text>
           <Text style={styles.time}>
             {bookedTime}, {day} {month}

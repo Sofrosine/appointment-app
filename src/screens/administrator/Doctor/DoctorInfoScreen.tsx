@@ -9,10 +9,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Button from "../components/Button";
-import { colors, sizes } from "../styles/Theme";
+import Button from "../../../components/Button";
+import { colors, sizes } from "../../../styles/Theme";
 
-export default function ServiceDetailScreen({ route, navigation }) {
+export default function DoctorInfoScreen({ route, navigation }) {
   const { item } = route.params || {};
 
   const shareContent = async () => {
@@ -28,13 +28,22 @@ export default function ServiceDetailScreen({ route, navigation }) {
 
   //NAVIGATION
   const goToBookingScreen = (item) => {
-    navigation.navigate("ServiceBookingScreen", { item });
+    navigation.navigate("DoctorAppointmentScreen", { item });
   };
 
   return (
     <View style={styles.out_container}>
       <ScrollView style={styles.container}>
         <View style={styles.share_container}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("DoctorDetailScreen", {
+                doctor: item,
+              });
+            }}
+          >
+            <Feather name="settings" size={24} color={colors.color_primary} />
+          </TouchableOpacity>
           <TouchableOpacity onPress={shareContent}>
             <Feather name="share" size={24} color={colors.color_primary} />
           </TouchableOpacity>
@@ -52,14 +61,6 @@ export default function ServiceDetailScreen({ route, navigation }) {
               </Text>
               <Text style={styles.about}>{item?.expert_area?.name} Expert</Text>
             </View>
-            {/* <View style={styles.location_container}>
-              <Ionicons
-                name="ios-location-outline"
-                size={18}
-                color={colors.color_primary}
-              />
-              <Text style={styles.location}>{item?.district}</Text>
-            </View> */}
           </View>
         </View>
         {/* Body */}
@@ -92,7 +93,7 @@ export default function ServiceDetailScreen({ route, navigation }) {
 
       <View style={styles.button_container}>
         <Button
-          text={"Book Appointment"}
+          text={"Unavailable Date"}
           onPress={() => goToBookingScreen(item)}
         />
       </View>
@@ -112,6 +113,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     flexDirection: "row-reverse",
     alignItems: "center",
+    gap: 16,
   },
   header_container: {
     flexDirection: "row",

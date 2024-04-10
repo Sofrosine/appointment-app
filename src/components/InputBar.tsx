@@ -20,7 +20,7 @@ export default InputBar;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    padding: 10,
     borderColor: colors.color_light_gray,
     backgroundColor: colors.color_light_gray,
     borderWidth: 1,

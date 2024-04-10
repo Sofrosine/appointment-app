@@ -1,18 +1,18 @@
 import React from "react";
 import {
   Image,
+  ScrollView,
   StyleSheet,
   Text,
-  View,
+  TouchableOpacity,
   TouchableWithoutFeedback,
-  ScrollView,
+  View,
 } from "react-native";
 import { colors } from "../styles/Theme";
-import { Ionicons } from "@expo/vector-icons";
 
 export default function CardMedium({ service, onSelect, image_source }) {
   return (
-    <TouchableWithoutFeedback onPress={onSelect}>
+    <TouchableOpacity activeOpacity={0.8} onPress={onSelect}>
       <View style={styles.container}>
         <View style={styles.info_container}>
           <Image source={{ uri: service?.image_url }} style={styles.image} />
@@ -21,7 +21,7 @@ export default function CardMedium({ service, onSelect, image_source }) {
               <Text style={styles.title}>
                 {service?.first_name} {service?.last_name}
               </Text>
-              <Text style={styles.desc}>{service?.expert_area}</Text>
+              <Text style={styles.desc}>{service?.expert_area?.name}</Text>
             </View>
 
             {/* <View style={styles.location_container}>
@@ -37,14 +37,18 @@ export default function CardMedium({ service, onSelect, image_source }) {
         <View style={styles.skills_container}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {service?.skills?.map((skill, index) => (
-              <View key={index} style={styles.chip_container}>
+              <View
+                onStartShouldSetResponder={() => true}
+                key={index}
+                style={styles.chip_container}
+              >
                 <Text style={styles.chips}>{skill}</Text>
               </View>
             ))}
           </ScrollView>
         </View>
       </View>
-    </TouchableWithoutFeedback>
+    </TouchableOpacity>
   );
 }
 

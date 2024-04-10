@@ -14,16 +14,17 @@ import { child, get, getDatabase, ref } from "firebase/database";
 import parseContentData from "../utils/ParseContentData";
 import CardAppointmentSmall from "../components/CardAppointmentSmall";
 import { sortAppointmentsByDateAndTime } from "../utils/CalendarUtils";
-import categories from "../utils/Categories";
 import { CardCarousel } from "../components/CardCarousel";
 import Category from "../components/Category";
 import { app, getAuth } from "../../firebaseConfig";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAppSelector } from "../hooks";
+import { showTopMessage } from "../utils/ErrorHandler";
 
 const auth = getAuth(app);
 export default function HomeScreen({ navigation }) {
   const [appointmentList, setAppointmentList] = useState([]);
+  const [categoryList, setCategoryList] = useState([]);
 
   const [userAuth, setUserAuth] = useState(null);
   const [isReady, setIsReady] = useState(false);
@@ -37,6 +38,24 @@ export default function HomeScreen({ navigation }) {
     auth?.onAuthStateChanged((userAuth) => {
       setUserAuth(!!userAuth);
     });
+
+    const dbRef = ref(getDatabase());
+
+    get(child(dbRef, "categories"))
+      .then((snapshot) => {
+        if (snapshot?.exists()) {
+          const categoryList = parseContentData(snapshot?.val());
+          setCategoryList(categoryList);
+        } else {
+          showTopMessage("No data to display", "info");
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+      .finally(() => {
+        setIsReady(true);
+      });
   }, []);
 
   useFocusEffect(
@@ -191,7 +210,7 @@ export default function HomeScreen({ navigation }) {
             )}
             <Text style={styles.text}>All Services</Text>
             <View style={styles.category_container}>
-              {categories?.map((category) => (
+              {categoryList?.map((category) => (
                 <Category
                   isSelected={false}
                   category={category}

@@ -1,23 +1,17 @@
+import { child, get, getDatabase, ref } from "firebase/database";
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  FlatList,
-  StyleSheet,
-  ActivityIndicator,
-  TouchableOpacity,
-} from "react-native";
+import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 import CardMedium from "../components/CardMedium";
+import Category from "../components/Category";
 import SearchBar from "../components/SearchBar";
-import { getDatabase, ref, child, get } from "firebase/database";
 import { colors, sizes } from "../styles/Theme";
 import { filterServicesByCategory } from "../utils/CategoryUtils";
-import categories from "../utils/Categories";
-import Category from "../components/Category";
 import { showTopMessage } from "../utils/ErrorHandler";
 import parseContentData from "../utils/ParseContentData";
 
 export default function SearchScreen({ navigation, route }) {
   const [loading, setLoading] = useState(true);
+  const [categoryList, setCategoryList] = useState([]);
   const [serviceList, setServiceList] = useState([]);
   const [filteredServiceList, setFilteredServiceList] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -52,6 +46,19 @@ export default function SearchScreen({ navigation, route }) {
       })
       .finally(() => {
         setLoading(false);
+      });
+
+    get(child(dbRef, "categories"))
+      .then((snapshot) => {
+        if (snapshot?.exists()) {
+          const categoryList = parseContentData(snapshot?.val());
+          setCategoryList(categoryList);
+        } else {
+          showTopMessage("No data to display", "info");
+        }
+      })
+      .catch((error) => {
+        console.error(error);
       });
   }, []);
 
@@ -137,7 +144,7 @@ export default function SearchScreen({ navigation, route }) {
               showsHorizontalScrollIndicator={false}
               snapToInterval={sizes.width + 24}
               decelerationRate={"fast"}
-              data={categories}
+              data={categoryList}
               keyExtractor={(category) => category?.name}
               renderItem={renderCategory}
             />

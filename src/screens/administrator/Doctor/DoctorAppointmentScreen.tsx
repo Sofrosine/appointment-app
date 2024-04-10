@@ -12,20 +12,20 @@ import { child, get, getDatabase, push, ref } from "firebase/database";
 import moment from "moment";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Calendar } from "react-native-calendars";
-import { app, getAuth } from "../../firebaseConfig";
-import Button from "../components/Button";
-import TimeSlot from "../components/TimeSlot";
-import { colors } from "../styles/Theme";
-import { showTopMessage } from "../utils/ErrorHandler";
+import { app, getAuth } from "../../../../firebaseConfig";
+import Button from "../../../components/Button";
+import TimeSlot from "../../../components/TimeSlot";
+import { colors } from "../../../styles/Theme";
+import { showTopMessage } from "../../../utils/ErrorHandler";
 import {
   configureNotifications,
   handleNotification,
-} from "../utils/NotificationService";
-import parseContentData from "../utils/ParseContentData";
+} from "../../../utils/NotificationService";
+import parseContentData from "../../../utils/ParseContentData";
 
 const auth = getAuth(app);
 
-export default function ServiceBookingScreen({ route, navigation }) {
+export default function DoctorAppointmentScreen({ route, navigation }) {
   const { item } = route.params || {};
   const doctorId = item?.id;
   const scrollViewRef = useRef(null);
@@ -165,7 +165,7 @@ export default function ServiceBookingScreen({ route, navigation }) {
   const pushAppointment = () => {
     const userId = user.uid;
     const doctorId = item?.id;
-    const type = item?.expert_area;
+    const type = item?.expert_area?.id;
     const bookedDate = selectedDate;
     const bookedTime = selectedTime;
 
@@ -250,13 +250,13 @@ export default function ServiceBookingScreen({ route, navigation }) {
               <Text style={styles.about}>{item?.expert_area?.name} Expert</Text>
             </View>
             {/* <View style={styles.location_container}>
-              <Ionicons
-                name="ios-location-outline"
-                size={18}
-                color={colors.color_primary}
-              />
-              <Text style={styles.location}>{item?.district}</Text>
-            </View> */}
+                <Ionicons
+                  name="ios-location-outline"
+                  size={18}
+                  color={colors.color_primary}
+                />
+                <Text style={styles.location}>{item?.district}</Text>
+              </View> */}
           </View>
         </View>
 
@@ -312,7 +312,7 @@ export default function ServiceBookingScreen({ route, navigation }) {
         )}
       </ScrollView>
       <View style={styles.button_container}>
-        <Button text={"Complete"} onPress={handleBooking} />
+        <Button text={"Save"} onPress={handleBooking} />
       </View>
     </View>
   );

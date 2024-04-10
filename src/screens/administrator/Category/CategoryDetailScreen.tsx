@@ -26,7 +26,7 @@ import { child, getDatabase, push, ref, remove, set } from "firebase/database";
 
 const auth = getAuth(app);
 
-const initialFormValues = {
+let initialFormValues = {
   name: "",
   subcategory: "",
 };
@@ -46,6 +46,15 @@ export default function CategoryDetailScreen({ navigation, route }) {
       initialFormValues.name = category?.name;
     }
   }, [category]);
+
+  useEffect(() => {
+    return () => {
+      initialFormValues = {
+        name: "",
+        subcategory: "",
+      };
+    };
+  }, []);
 
   const handleDelete = async () => {
     if (!category?.id) return; // Safety check
@@ -206,7 +215,13 @@ export default function CategoryDetailScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20 }}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 48,
+          paddingBottom: 120,
+        }}
+      >
         <Text style={styles.header_text}>
           {category ? "Update" : "Add"} Category
         </Text>
@@ -326,8 +341,6 @@ export default function CategoryDetailScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 48,
-    marginBottom: 120,
   },
 
   header_text: {

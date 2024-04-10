@@ -34,26 +34,27 @@ export default function DoctorScreen({ navigation }) {
 
   const user = auth?.currentUser;
 
-  // User session
-  useEffect(() => {
-    const dbRef = ref(getDatabase());
+  useFocusEffect(
+    useCallback(() => {
+      const dbRef = ref(getDatabase());
 
-    get(child(dbRef, "doctors"))
-      .then((snapshot) => {
-        if (snapshot?.exists()) {
-          const doctorList = parseContentData(snapshot?.val());
-          setDoctorList(doctorList);
-        } else {
-          showTopMessage("No data to display", "info");
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      })
-      .finally(() => {
-        setIsReady(true);
-      });
-  }, []);
+      get(child(dbRef, "doctors"))
+        .then((snapshot) => {
+          if (snapshot?.exists()) {
+            const doctorList = parseContentData(snapshot?.val());
+            setDoctorList(doctorList);
+          } else {
+            showTopMessage("No data to display", "info");
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+        .finally(() => {
+          setIsReady(true);
+        });
+    }, [])
+  );
 
   return (
     <View style={{ flex: 1 }}>
@@ -69,7 +70,9 @@ export default function DoctorScreen({ navigation }) {
                   left: 16,
                   bottom: 16,
                 }}
-                onPress={() => {}}
+                onPress={() => {
+                  navigation.navigate("DoctorDetailScreen");
+                }}
               >
                 <FontAwesome
                   name="plus"
@@ -89,7 +92,7 @@ export default function DoctorScreen({ navigation }) {
                     service={item}
                     key={item.id}
                     onSelect={() => {
-                      navigation.navigate("ServiceDetailScreen", { item });
+                      navigation.navigate("DoctorInfoScreen", { item });
                     }}
                   />
                 );

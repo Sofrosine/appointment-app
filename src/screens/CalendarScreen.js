@@ -101,7 +101,7 @@ export default function CalendarScreen() {
         showTopMessage("Appointment deleted!", "success");
         handleNotification(
           "Appointment Canceled",
-          `${appointment?.type} appointment has been canceled.`
+          `${appointment?.type?.name} appointment has been canceled.`
         );
         if (appointmentList.length == 1) {
           setAppointmentList([]);

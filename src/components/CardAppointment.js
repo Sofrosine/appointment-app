@@ -41,7 +41,7 @@ export default function CardAppointment({
         </View>
         <View style={styles.info_container}>
           <Text style={styles.appType}>
-            {type}, {fullName}
+            {type?.name}, {fullName}
           </Text>
           <Text style={styles.time}>{bookedTime}</Text>
         </View>

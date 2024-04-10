@@ -106,7 +106,7 @@ export default function MapScreen({ navigation }) {
                       {service.firstName} {service.lastName}
                     </Text>
                     <Text style={styles.callout_text}>
-                      {service.expert_area}
+                      {service?.expert_area?.name}
                     </Text>
                   </View>
 
