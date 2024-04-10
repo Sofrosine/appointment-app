@@ -213,7 +213,6 @@ export default function ServiceBookingScreen({ route, navigation }) {
   };
 
   const onTimeSelect = (time) => {
-    console.log(time);
     setSelectedTime(time);
   };
 

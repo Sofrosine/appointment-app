@@ -5,10 +5,11 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 
-import { child, get, getDatabase, push, ref } from "firebase/database";
+import { child, get, getDatabase, push, ref, set } from "firebase/database";
 import moment from "moment";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Calendar } from "react-native-calendars";
@@ -22,6 +23,7 @@ import {
   handleNotification,
 } from "../../../utils/NotificationService";
 import parseContentData from "../../../utils/ParseContentData";
+import { FontAwesome } from "@expo/vector-icons";
 
 const auth = getAuth(app);
 
@@ -31,11 +33,10 @@ export default function DoctorAppointmentScreen({ route, navigation }) {
   const scrollViewRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
+  const [submitLoading, setSubmitLoading] = useState(false);
+
   const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedTime, setSelectedTime] = useState(null);
-  const [timeList, setTimeList] = useState([]);
-  const [doctorTimeList, setDoctorTimeList] = useState([]);
-  const [bookedApps, setBookedApps] = useState([]);
+  const [unavailableDates, setUnavailableDates] = useState([]);
 
   const today = moment().format("YYYY-MM-DD");
   const threeMonthsLater = moment().add(3, "months").format("YYYY-MM-DD");
@@ -47,15 +48,17 @@ export default function DoctorAppointmentScreen({ route, navigation }) {
   }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      await getTimeListFromDatabase();
-    };
+    if (item) {
+      setUnavailableDates(item?.unavailable_dates);
+    }
+  }, [item]);
 
-    fetchData();
+  const selectedDateMemo = useMemo(() => {
+    return selectedDate ?? {};
   }, [selectedDate]);
 
-  const unavailableDates = useMemo(() => {
-    const arr = item?.unavailable_dates ? [...item?.unavailable_dates] : [];
+  const unavailableDatesMemo = useMemo(() => {
+    const arr = unavailableDates ? [...unavailableDates] : [];
     const obj = {};
     arr.forEach((val) => {
       obj[val] = {
@@ -64,165 +67,69 @@ export default function DoctorAppointmentScreen({ route, navigation }) {
     });
 
     return obj;
-  }, [item]);
+  }, [unavailableDates]);
 
-  const getTimeListFromDatabase = async () => {
-    setLoading(true);
-    try {
-      const dbRef = ref(getDatabase());
-      const snapshot = await get(child(dbRef, "times"));
+  // const getTimeListFromDatabase = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const dbRef = ref(getDatabase());
+  //     const snapshot = await get(child(dbRef, "times"));
 
-      if (snapshot.exists()) {
-        const timeList = parseContentData(snapshot.val());
-        setTimeList(timeList);
-      } else {
-        console.log("No data time list");
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     if (snapshot.exists()) {
+  //       const timeList = parseContentData(snapshot.val());
+  //       setTimeList(timeList);
+  //     } else {
+  //       console.log("No data time list");
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  const getServiceAppointments = async (day) => {
-    setLoading(true);
-    setDoctorTimeList([]);
+  const handleSave = () => {
+    let parsedData = parseContentData(selectedDate ?? {});
+    parsedData = parsedData?.map((val) => val?.id);
 
-    try {
-      const appointmentsRef = ref(getDatabase(), "appointments");
-      const snapshot = await get(appointmentsRef);
-
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        let serviceBookings = [];
-
-        Object.keys(data).forEach((user) => {
-          const appointments = data[user];
-
-          Object.keys(appointments).forEach((appointmentId) => {
-            const app = appointments[appointmentId];
-
-            if (app?.doctor_id === doctorId && app?.booked_date === day) {
-              serviceBookings.push(app);
-            }
-          });
-        });
-
-        setBookedApps(serviceBookings);
-
-        const availableTimes = timeList?.map((time) => {
-          const bookedHour = serviceBookings.some(
-            (app) => app?.booked_time === time?.app_time
-          );
-
-          return {
-            ...time,
-            is_booked: bookedHour ? true : false,
-          };
-        });
-
-        setDoctorTimeList(availableTimes);
-      } else {
-        console.log("No data");
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-      return true;
-    }
-  };
-
-  const handleBooking = () => {
-    if (selectedDate && selectedTime && user) {
-      Alert.alert(
-        "Create Appointment",
-        "Your appointment will be created, are you sure?",
-        [
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
-          {
-            text: "Confirm",
-            onPress: () => {
-              pushAppointment();
-            },
-          },
-        ]
-      );
-    } else {
-      if (!user) {
-        showTopMessage("You are not logged in", "success");
-        goToSignInScreen();
-      } else if (!selectedDate || !selectedTime) {
-        showTopMessage("Please select a date and a time.", "info");
-      }
-    }
-  };
-
-  const pushAppointment = () => {
-    const userId = user?.uid;
-    const doctorId = item?.id;
-    const type = item?.expert_area?.id;
-    const bookedDate = selectedDate;
-    const bookedTime = selectedTime;
-
-    const appointmentsRef = ref(getDatabase(), "appointments/" + user?.uid);
-
-    push(appointmentsRef, {
-      user_id: userId,
-      doctor_id: doctorId,
-      doctor: item,
-      type,
-      booked_date: bookedDate,
-      booked_time: bookedTime,
+    const db = getDatabase(app);
+    const doctorRef = ref(db, `doctors/${item?.id}`);
+    set(doctorRef, {
+      ...item,
+      unavailable_dates: [...parsedData, ...unavailableDates],
     })
-      .then(async () => {
-        showTopMessage("Your appointment has been created!", "success");
-
-        handleNotification(
-          "Upcoming Appointment",
-          `Your appointment for ${bookedDate}, at ${bookedTime} has been created.`
-        );
-        goToCompletedScreen();
-        setSelectedTime(null);
-        setSelectedDate(null);
+      .then(() => {
+        showTopMessage("Success update dates", "success");
+        navigation.reset({
+          routes: [{ name: "DoctorScreen" }],
+        });
       })
-      .catch((error) => {
-        showTopMessage("An error occurred.", "info");
-        console.error(error);
-        setSelectedTime(null);
-        setSelectedDate(null);
+      .catch(() => {
+        showTopMessage("Error", "danger");
+      })
+      .finally(() => {
+        setSubmitLoading(false);
       });
   };
 
   const onDateSelect = async (day) => {
-    try {
-      setLoading(true);
-      setSelectedDate(day?.dateString);
+    const obj = { ...selectedDate };
 
-      await getTimeListFromDatabase();
-      await getServiceAppointments(day?.dateString);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+    if (obj[day?.dateString]) {
+      delete obj[day?.dateString];
+    } else {
+      obj[day?.dateString] = {
+        selected: true,
+        disableTouchEvent: false,
+        selectedColor: colors.color_primary,
+        selectedTextColor: colors.color_white,
+      };
     }
+    setSelectedDate(obj);
   };
 
-  const onTimeSelect = (time) => {
-    console.log(time);
-    setSelectedTime(time);
-  };
-
-  const goToCompletedScreen = () => {
-    navigation.navigate("SearchScreen");
-  };
-
-  const goToSignInScreen = () => {
-    navigation.navigate("SignInScreen");
+  const removeUnavailableDate = (date: string) => {
+    setUnavailableDates(unavailableDates?.filter((sc) => sc !== date));
   };
 
   return (
@@ -260,6 +167,59 @@ export default function DoctorAppointmentScreen({ route, navigation }) {
               </View> */}
           </View>
         </View>
+        <View style={styles.text_container}>
+          <Text style={styles.subTitle}>Unavailable Dates:</Text>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 8,
+          }}
+        >
+          {unavailableDates?.map((sc) => {
+            return (
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderRadius: 20,
+                  borderColor: colors.color_primary,
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+                key={sc}
+              >
+                <Text
+                  style={{
+                    color: colors.color_primary,
+                    fontSize: 14,
+                    fontWeight: "500",
+                  }}
+                >
+                  {sc}
+                </Text>
+                <TouchableOpacity
+                  hitSlop={{
+                    top: 8,
+                    right: 8,
+                    bottom: 8,
+                  }}
+                  onPress={() => removeUnavailableDate(sc)}
+                >
+                  <FontAwesome
+                    name="close"
+                    color={colors.color_primary}
+                    size={16}
+                  />
+                </TouchableOpacity>
+              </View>
+            );
+          })}
+        </View>
 
         <View style={styles.text_container}>
           <Text style={styles.subTitle}>Select Date:</Text>
@@ -267,15 +227,16 @@ export default function DoctorAppointmentScreen({ route, navigation }) {
 
         <Calendar
           style={styles.calendar_container}
-          onDayPress={!loading ? onDateSelect : undefined}
+          onDayPress={onDateSelect}
           markedDates={{
-            [selectedDate]: {
-              selected: true,
-              disableTouchEvent: true,
-              selectedColor: colors.color_primary,
-              selectedTextColor: colors.color_white,
-            },
-            ...unavailableDates,
+            // [selectedDate]: {
+            //   selected: true,
+            //   disableTouchEvent: true,
+            //   selectedColor: colors.color_primary,
+            //   selectedTextColor: colors.color_white,
+            // },
+            ...selectedDateMemo,
+            ...unavailableDatesMemo,
           }}
           customStyle={{
             today: {
@@ -286,34 +247,9 @@ export default function DoctorAppointmentScreen({ route, navigation }) {
           minDate={today}
           maxDate={threeMonthsLater}
         />
-
-        {selectedDate && (
-          <View style={styles.bottom_container}>
-            {loading ? (
-              <ActivityIndicator />
-            ) : (
-              <>
-                <View style={styles.text_container}>
-                  <Text style={styles.subTitle}>Select Time:</Text>
-                </View>
-                <View style={styles.time_container}>
-                  {doctorTimeList?.map((time) => (
-                    <TimeSlot
-                      key={time?.id?.toString()}
-                      time={time}
-                      onPress={onTimeSelect}
-                      isSelected={selectedTime === time?.app_time}
-                      isBooked={time?.is_booked}
-                    />
-                  ))}
-                </View>
-              </>
-            )}
-          </View>
-        )}
       </ScrollView>
       <View style={styles.button_container}>
-        <Button text={"Save"} onPress={handleBooking} />
+        <Button loading={submitLoading} text={"Save"} onPress={handleSave} />
       </View>
     </View>
   );
