@@ -26,6 +26,7 @@ import HomeStack from "./UserStack/HomeStack";
 import SearchStack from "./UserStack/SearchStack";
 import DoctorStack from "./AdminStack/DoctorStack";
 import CategoryStack from "./AdminStack/CategoryStack";
+import AppointmentStack from "./AdminStack/AppointmentStack";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -109,6 +110,7 @@ export default function Router() {
         ) : (
           <>
             <Tab.Screen name="Doctor" component={DoctorStack} />
+            <Tab.Screen name="Appointments" component={AppointmentStack} />
             <Tab.Screen name="Category" component={CategoryStack} />
           </>
         )}

@@ -31,7 +31,7 @@ const SignInScreen = ({ navigation }) => {
 
     signInWithEmailAndPassword(auth, formValues.usermail, formValues.password)
       .then((userCredential) => {
-        const uid = userCredential?.user.uid;
+        const uid = userCredential?.user?.uid;
         fetchUserData(uid);
       })
       .catch((err) => {

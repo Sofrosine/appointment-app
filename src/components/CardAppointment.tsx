@@ -14,7 +14,7 @@ export default function CardAppointment({
   appointment,
   serviceInfo,
   onPressCancel,
-  onPress,
+  onPressUpdate,
 }) {
   const {
     type,
@@ -52,11 +52,21 @@ export default function CardAppointment({
                 name="dots-three-vertical"
                 size={20}
                 color={colors.color_light_gray}
-                onPress={onPress}
               />
             </MenuTrigger>
             <MenuOptions>
-              <MenuOption onSelect={onPressCancel} text="Cancel"></MenuOption>
+              {onPressUpdate && (
+                <MenuOption
+                  style={{ paddingVertical: 8 }}
+                  onSelect={onPressUpdate}
+                  text="Update"
+                ></MenuOption>
+              )}
+              <MenuOption
+                style={{ paddingVertical: 8 }}
+                onSelect={onPressCancel}
+                text="Cancel"
+              ></MenuOption>
             </MenuOptions>
           </Menu>
         </TouchableOpacity>

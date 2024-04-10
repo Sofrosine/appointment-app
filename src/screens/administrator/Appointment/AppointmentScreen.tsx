@@ -8,20 +8,21 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import parseContentData from "../utils/ParseContentData";
-import { colors, sizes } from "../styles/Theme";
-import CardAppointment from "../components/CardAppointment";
-import { showTopMessage } from "../utils/ErrorHandler";
-import { sortAppointmentsByDateAndTime } from "../utils/CalendarUtils";
+import parseContentData from "../../../utils/ParseContentData";
+import { colors, sizes } from "../../../styles/Theme";
+import CardAppointment from "../../../components/CardAppointment";
+import { showTopMessage } from "../../../utils/ErrorHandler";
+import { sortAppointmentsByDateAndTime } from "../../../utils/CalendarUtils";
 import {
   configureNotifications,
   handleNotification,
-} from "../utils/NotificationService";
-import { app, getAuth } from "../../firebaseConfig";
+} from "../../../utils/NotificationService";
+import { app, getAuth } from "../../../../firebaseConfig";
 import { useFocusEffect } from "@react-navigation/native";
+import { parseNestedContentData } from "../../../utils";
 
 const auth = getAuth(app);
-export default function CalendarScreen() {
+export default function AppointmentScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [appointmentList, setAppointmentList] = useState([]);
   const user = auth?.currentUser;
@@ -40,29 +41,14 @@ export default function CalendarScreen() {
 
   const fetchData = () => {
     const dbRef = ref(getDatabase());
+    setLoading(true);
 
-    get(child(dbRef, "appointments/" + user?.uid))
+    get(child(dbRef, "appointments/"))
       .then((snapshot) => {
         if (snapshot.exists()) {
-          const data = parseContentData(snapshot?.val());
+          const data = parseNestedContentData(snapshot?.val());
 
-          const servicePromises = data?.map((appointment) =>
-            fetchDoctors(appointment?.doctor_id)
-          );
-
-          // Wait for all promises to resolve
-          Promise.all(servicePromises)
-            // Add service information to appointment data
-            .then((serviceInfos) => {
-              const appointmentList = data?.map((appointment, index) => ({
-                ...appointment,
-                serviceInfo: serviceInfos[index],
-              }));
-              // Update appointment list sorted by date and time
-              setAppointmentList(
-                sortAppointmentsByDateAndTime(appointmentList)
-              );
-            });
+          setAppointmentList(sortAppointmentsByDateAndTime(data));
         }
       })
       .catch((error) => {
@@ -73,27 +59,11 @@ export default function CalendarScreen() {
       });
   };
 
-  async function fetchDoctors(id) {
-    const dbRef = ref(getDatabase(), "doctors/" + id);
-
-    return get(dbRef)
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          return snapshot.val();
-        } else {
-          return null;
-        }
-      })
-      .catch(() => {
-        console.error(error);
-        return null;
-      });
-  }
-
   function removeAppointment(appointment) {
+    console.log(appointment);
     const appointmentsRef = ref(
       getDatabase(),
-      "appointments/" + user.uid + "/" + appointment.id
+      "appointments/" + appointment?.user_id + "/" + appointment?.child_key
     );
 
     remove(appointmentsRef)
@@ -103,9 +73,9 @@ export default function CalendarScreen() {
           "Appointment Canceled",
           `${appointment?.type?.name} appointment has been canceled.`
         );
-        if (appointmentList.length == 1) {
-          setAppointmentList([]);
-        }
+        // if (appointmentList.length == 1) {
+        //   setAppointmentList([]);
+        // }
         fetchData();
       })
       .catch((error) => {
@@ -134,7 +104,7 @@ export default function CalendarScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header_text}>My Appointments</Text>
+      <Text style={styles.header_text}>Appointments</Text>
       {loading ? (
         <ActivityIndicator
           style={styles.loading_container}
@@ -143,14 +113,21 @@ export default function CalendarScreen() {
         />
       ) : (
         <View style={styles.list_container}>
-          {appointmentList.length === 0 ? (
+          {loading ? (
+            <View />
+          ) : appointmentList.length === 0 ? (
             <Text style={styles.emptyViewText}>No appointments found!</Text>
           ) : (
             <View>
               {appointmentList?.map((appointment) => (
                 <CardAppointment
+                  onPressUpdate={() => {
+                    navigation.navigate("AppointmentDetailScreen", {
+                      item: appointment,
+                    });
+                  }}
                   appointment={appointment}
-                  serviceInfo={appointment?.serviceInfo}
+                  serviceInfo={appointment?.doctor}
                   key={appointment.id}
                   onPressCancel={() => handleCancel(appointment)}
                 />

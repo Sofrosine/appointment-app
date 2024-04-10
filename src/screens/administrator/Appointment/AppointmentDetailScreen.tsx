@@ -8,26 +8,26 @@ import {
   View,
 } from "react-native";
 
-import { child, get, getDatabase, push, ref } from "firebase/database";
+import { child, get, getDatabase, push, ref, set } from "firebase/database";
 import moment from "moment";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Calendar } from "react-native-calendars";
-import { app, getAuth } from "../../firebaseConfig";
-import Button from "../components/Button";
-import TimeSlot from "../components/TimeSlot";
-import { colors } from "../styles/Theme";
-import { showTopMessage } from "../utils/ErrorHandler";
+import { app, getAuth } from "../../../../firebaseConfig";
+import Button from "../../../components/Button";
+import TimeSlot from "../../../components/TimeSlot";
+import { colors } from "../../../styles/Theme";
+import { showTopMessage } from "../../../utils/ErrorHandler";
 import {
   configureNotifications,
   handleNotification,
-} from "../utils/NotificationService";
-import parseContentData from "../utils/ParseContentData";
+} from "../../../utils/NotificationService";
+import parseContentData from "../../../utils/ParseContentData";
 
 const auth = getAuth(app);
 
-export default function ServiceBookingScreen({ route, navigation }) {
+export default function AppointmentDetailScreen({ route, navigation }) {
   const { item } = route.params || {};
-  const doctorId = item?.id;
+  const doctorId = item?.doctor_id;
   const scrollViewRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
@@ -39,8 +39,6 @@ export default function ServiceBookingScreen({ route, navigation }) {
 
   const today = moment().format("YYYY-MM-DD");
   const threeMonthsLater = moment().add(3, "months").format("YYYY-MM-DD");
-
-  const user = auth?.currentUser;
 
   useEffect(() => {
     configureNotifications();
@@ -55,7 +53,9 @@ export default function ServiceBookingScreen({ route, navigation }) {
   }, [selectedDate]);
 
   const unavailableDates = useMemo(() => {
-    const arr = item?.unavailable_dates ? [...item?.unavailable_dates] : [];
+    const arr = item?.doctor?.unavailable_dates
+      ? [...item?.doctor?.unavailable_dates]
+      : [];
     const obj = {};
     arr.forEach((val) => {
       obj[val] = {
@@ -135,10 +135,10 @@ export default function ServiceBookingScreen({ route, navigation }) {
   };
 
   const handleBooking = () => {
-    if (selectedDate && selectedTime && user) {
+    if (selectedDate && selectedTime) {
       Alert.alert(
-        "Create Appointment",
-        "Your appointment will be created, are you sure?",
+        "Update Appointment",
+        "Your appointment will be updated, are you sure?",
         [
           {
             text: "Cancel",
@@ -153,38 +153,38 @@ export default function ServiceBookingScreen({ route, navigation }) {
         ]
       );
     } else {
-      if (!user) {
-        showTopMessage("You are not logged in", "success");
-        goToSignInScreen();
-      } else if (!selectedDate || !selectedTime) {
+      if (!selectedDate || !selectedTime) {
         showTopMessage("Please select a date and a time.", "info");
       }
     }
   };
 
   const pushAppointment = () => {
-    const userId = user?.uid;
-    const doctorId = item?.id;
-    const type = item?.expert_area;
+    const userId = item?.user_id;
+    const doctorId = item?.doctor_id;
+    const type = item?.doctor?.expert_area;
     const bookedDate = selectedDate;
     const bookedTime = selectedTime;
 
-    const appointmentsRef = ref(getDatabase(), "appointments/" + user?.uid);
+    const appointmentsRef = ref(
+      getDatabase(),
+      "appointments/" + `${userId}/` + item?.child_key
+    );
 
-    push(appointmentsRef, {
+    set(appointmentsRef, {
       user_id: userId,
       doctor_id: doctorId,
-      doctor: item,
+      doctor: item?.doctor,
       type,
       booked_date: bookedDate,
       booked_time: bookedTime,
     })
       .then(async () => {
-        showTopMessage("Your appointment has been created!", "success");
+        showTopMessage("Your appointment has been updated!", "success");
 
         handleNotification(
           "Upcoming Appointment",
-          `Your appointment for ${bookedDate}, at ${bookedTime} has been created.`
+          `Your appointment for ${bookedDate}, at ${bookedTime} has been updated.`
         );
         goToCompletedScreen();
         setSelectedTime(null);
@@ -218,11 +218,7 @@ export default function ServiceBookingScreen({ route, navigation }) {
   };
 
   const goToCompletedScreen = () => {
-    navigation.navigate("SearchScreen");
-  };
-
-  const goToSignInScreen = () => {
-    navigation.navigate("SignInScreen");
+    navigation.goBack();
   };
 
   return (
@@ -241,23 +237,25 @@ export default function ServiceBookingScreen({ route, navigation }) {
         <View style={styles.header_container}>
           <Image
             style={styles.image_container}
-            source={{ uri: item?.image_url }}
+            source={{ uri: item?.doctor?.image_url }}
           />
           <View>
             <View style={styles.title_container}>
               <Text style={styles.title}>
-                {item?.first_name} {item?.last_name}
+                {item?.doctor?.first_name} {item?.doctor?.last_name}
               </Text>
-              <Text style={styles.about}>{item?.expert_area?.name} Expert</Text>
+              <Text style={styles.about}>
+                {item?.doctor?.expert_area?.name} Expert
+              </Text>
             </View>
             {/* <View style={styles.location_container}>
-              <Ionicons
-                name="ios-location-outline"
-                size={18}
-                color={colors.color_primary}
-              />
-              <Text style={styles.location}>{item?.district}</Text>
-            </View> */}
+                <Ionicons
+                  name="ios-location-outline"
+                  size={18}
+                  color={colors.color_primary}
+                />
+                <Text style={styles.location}>{item?.district}</Text>
+              </View> */}
           </View>
         </View>
 
@@ -313,7 +311,7 @@ export default function ServiceBookingScreen({ route, navigation }) {
         )}
       </ScrollView>
       <View style={styles.button_container}>
-        <Button text={"Complete"} onPress={handleBooking} />
+        <Button text={"Update"} onPress={handleBooking} />
       </View>
     </View>
   );

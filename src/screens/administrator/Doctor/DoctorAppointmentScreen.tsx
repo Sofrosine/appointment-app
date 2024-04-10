@@ -163,7 +163,7 @@ export default function DoctorAppointmentScreen({ route, navigation }) {
   };
 
   const pushAppointment = () => {
-    const userId = user.uid;
+    const userId = user?.uid;
     const doctorId = item?.id;
     const type = item?.expert_area?.id;
     const bookedDate = selectedDate;
@@ -174,6 +174,7 @@ export default function DoctorAppointmentScreen({ route, navigation }) {
     push(appointmentsRef, {
       user_id: userId,
       doctor_id: doctorId,
+      doctor: item,
       type,
       booked_date: bookedDate,
       booked_time: bookedTime,

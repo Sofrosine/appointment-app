@@ -6,10 +6,10 @@ function parseDate(dateString) {
 export function sortAppointmentsByDateAndTime(appointmentList) {
     return appointmentList.slice().sort((a, b) => {
         // Tarih karşılaştırması
-        const dateComparison = parseDate(a.bookedDate).getTime() - parseDate(b.bookedDate).getTime();
+        const dateComparison = parseDate(a.booked_date)?.getTime() - parseDate(b?.booked_date).getTime();
         if (dateComparison === 0) {
             // Eğer tarihler aynıysa saatlere göre sırala
-            return a.bookedTime.localeCompare(b.bookedTime);
+            return a.booked_time.localeCompare(b.booked_time);
         }
         return dateComparison;
     });

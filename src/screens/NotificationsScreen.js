@@ -32,7 +32,7 @@ export default function NotificationsScreen({ navigation }) {
     if (userAuth) {
       const dbRef = ref(getDatabase());
 
-      get(child(dbRef, "appointments/" + user.uid))
+      get(child(dbRef, "appointments/" + user?.uid))
         .then((snapshot) => {
           if (snapshot.exists()) {
             const getList = parseContentData(snapshot.val());
