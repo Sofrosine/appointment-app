@@ -29,7 +29,7 @@ const auth = getAuth(app);
 
 export default function DoctorAppointmentScreen({ route, navigation }) {
   const { item } = route.params || {};
-  const doctorId = item?.id;
+
   const scrollViewRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
@@ -37,11 +37,11 @@ export default function DoctorAppointmentScreen({ route, navigation }) {
 
   const [selectedDate, setSelectedDate] = useState(null);
   const [unavailableDates, setUnavailableDates] = useState([]);
+  const [timeList, setTimeList] = useState([]);
+  const [selectedTimes, setSelectedTimes] = useState([]);
 
   const today = moment().format("YYYY-MM-DD");
   const threeMonthsLater = moment().add(3, "months").format("YYYY-MM-DD");
-
-  const user = auth?.currentUser;
 
   useEffect(() => {
     configureNotifications();
@@ -53,50 +53,55 @@ export default function DoctorAppointmentScreen({ route, navigation }) {
     }
   }, [item]);
 
-  const selectedDateMemo = useMemo(() => {
-    return selectedDate ?? {};
+  useEffect(() => {
+    const fetchData = async () => {
+      await getTimeListFromDatabase();
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (selectedDate && item?.unavailable_dates) {
+      if (item?.unavailable_dates[selectedDate]) {
+        setSelectedTimes(item?.unavailable_dates[selectedDate]);
+      }
+    }
   }, [selectedDate]);
 
-  const unavailableDatesMemo = useMemo(() => {
-    const arr = unavailableDates ? [...unavailableDates] : [];
-    const obj = {};
-    arr?.forEach((val) => {
-      obj[val] = {
-        disabled: true,
-      };
-    });
+  const getTimeListFromDatabase = async () => {
+    setLoading(true);
+    try {
+      const dbRef = ref(getDatabase());
+      const snapshot = await get(child(dbRef, "times"));
 
-    return obj;
-  }, [unavailableDates]);
-
-  // const getTimeListFromDatabase = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const dbRef = ref(getDatabase());
-  //     const snapshot = await get(child(dbRef, "times"));
-
-  //     if (snapshot.exists()) {
-  //       const timeList = parseContentData(snapshot.val());
-  //       setTimeList(timeList);
-  //     } else {
-  //       console.log("No data time list");
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+      if (snapshot.exists()) {
+        const timeList = parseContentData(snapshot.val());
+        setTimeList(timeList);
+      } else {
+        console.log("No data time list");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSave = () => {
-    let parsedData = parseContentData(selectedDate ?? {});
-    parsedData = parsedData?.map((val) => val?.id);
-console.log(parsedData, unavailableDates)
+    const objTime = {};
+    selectedTimes?.map((val, i) => {
+      objTime[i] = val;
+    });
+
     const db = getDatabase(app);
     const doctorRef = ref(db, `doctors/${item?.id}`);
     set(doctorRef, {
       ...item,
-      unavailable_dates: [...parsedData, ...unavailableDates],
+      unavailable_dates: {
+        ...item?.unavailable_dates,
+        [selectedDate]: objTime,
+      },
     })
       .then(() => {
         showTopMessage("Success update dates", "success");
@@ -113,24 +118,22 @@ console.log(parsedData, unavailableDates)
   };
 
   const onDateSelect = async (day) => {
-    const obj = { ...selectedDate };
+    setSelectedDate(day?.dateString);
+    setSelectedTimes([]);
+    scrollViewRef.current.scrollToEnd({ animated: true });
+  };
 
-    if (obj[day?.dateString]) {
-      delete obj[day?.dateString];
+  const onTimeSelect = (time) => {
+    if (selectedTimes?.includes(time)) {
+      setSelectedTimes(selectedTimes?.filter((val) => val !== time));
     } else {
-      obj[day?.dateString] = {
-        selected: true,
-        disableTouchEvent: false,
-        selectedColor: colors.color_primary,
-        selectedTextColor: colors.color_white,
-      };
+      setSelectedTimes([...selectedTimes, time]);
     }
-    setSelectedDate(obj);
   };
 
-  const removeUnavailableDate = (date: string) => {
-    setUnavailableDates(unavailableDates?.filter((sc) => sc !== date));
-  };
+  // const removeUnavailableDate = (date: string) => {
+  //   setUnavailableDates(unavailableDates?.filter((sc) => sc !== date));
+  // };
 
   return (
     <View style={styles.out_container}>
@@ -138,11 +141,11 @@ console.log(parsedData, unavailableDates)
         nestedScrollEnabled={true}
         ref={scrollViewRef}
         style={styles.container}
-        onContentSizeChange={(contentWidth, contentHeight) => {
-          if (!loading && scrollViewRef.current) {
-            scrollViewRef.current.scrollToEnd({ animated: true });
-          }
-        }}
+        // onContentSizeChange={(contentWidth, contentHeight) => {
+        //   if (!loading && scrollViewRef.current) {
+        //     scrollViewRef.current.scrollToEnd({ animated: true });
+        //   }
+        // }}
       >
         {/* Header */}
         <View style={styles.header_container}>
@@ -157,68 +160,7 @@ console.log(parsedData, unavailableDates)
               </Text>
               <Text style={styles.about}>{item?.expert_area?.name} Expert</Text>
             </View>
-            {/* <View style={styles.location_container}>
-                <Ionicons
-                  name="ios-location-outline"
-                  size={18}
-                  color={colors.color_primary}
-                />
-                <Text style={styles.location}>{item?.district}</Text>
-              </View> */}
           </View>
-        </View>
-        <View style={styles.text_container}>
-          <Text style={styles.subTitle}>Unavailable Dates:</Text>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 8,
-          }}
-        >
-          {unavailableDates?.map((sc) => {
-            return (
-              <View
-                style={{
-                  borderWidth: 1,
-                  borderRadius: 20,
-                  borderColor: colors.color_primary,
-                  paddingVertical: 8,
-                  paddingHorizontal: 12,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-                key={sc}
-              >
-                <Text
-                  style={{
-                    color: colors.color_primary,
-                    fontSize: 14,
-                    fontWeight: "500",
-                  }}
-                >
-                  {sc}
-                </Text>
-                <TouchableOpacity
-                  hitSlop={{
-                    top: 8,
-                    right: 8,
-                    bottom: 8,
-                  }}
-                  onPress={() => removeUnavailableDate(sc)}
-                >
-                  <FontAwesome
-                    name="close"
-                    color={colors.color_primary}
-                    size={16}
-                  />
-                </TouchableOpacity>
-              </View>
-            );
-          })}
         </View>
 
         <View style={styles.text_container}>
@@ -229,14 +171,12 @@ console.log(parsedData, unavailableDates)
           style={styles.calendar_container}
           onDayPress={onDateSelect}
           markedDates={{
-            // [selectedDate]: {
-            //   selected: true,
-            //   disableTouchEvent: true,
-            //   selectedColor: colors.color_primary,
-            //   selectedTextColor: colors.color_white,
-            // },
-            ...selectedDateMemo,
-            ...unavailableDatesMemo,
+            [selectedDate]: {
+              selected: true,
+              disableTouchEvent: true,
+              selectedColor: colors.color_primary,
+              selectedTextColor: colors.color_white,
+            },
           }}
           customStyle={{
             today: {
@@ -247,6 +187,31 @@ console.log(parsedData, unavailableDates)
           minDate={today}
           maxDate={threeMonthsLater}
         />
+        {selectedDate && (
+          <View style={styles.bottom_container}>
+            {loading ? (
+              <ActivityIndicator />
+            ) : (
+              <>
+                <View style={styles.text_container}>
+                  <Text style={styles.subTitle}>Select Time:</Text>
+                </View>
+                <View style={styles.time_container}>
+                  {timeList?.map((time) => (
+                    <TimeSlot
+                      key={time?.id?.toString()}
+                      time={time}
+                      onPress={onTimeSelect}
+                      isSelected={selectedTimes?.includes(time?.app_time)}
+                      isDisabled={false}
+                      isBooked={time?.is_booked}
+                    />
+                  ))}
+                </View>
+              </>
+            )}
+          </View>
+        )}
       </ScrollView>
       <View style={styles.button_container}>
         <Button loading={submitLoading} text={"Save"} onPress={handleSave} />

@@ -2,17 +2,17 @@ import React, { useRef } from "react";
 import { TouchableOpacity, Text, StyleSheet, Animated } from "react-native";
 import { colors } from "../styles/Theme";
 
-const TimeSlot = ({ time, onPress, isSelected, isBooked }) => {
+const TimeSlot = ({ time, onPress, isSelected, isDisabled, isBooked }) => {
   const scaleValue = useRef(new Animated.Value(1)).current;
 
   const handlePress = () => {
-    if (!isBooked) {
+    if (!isBooked && !isDisabled) {
       onPress(time?.app_time);
     }
   };
 
   const handlePressIn = () => {
-    if (!isBooked) {
+    if (!isBooked && !isDisabled) {
       Animated.spring(scaleValue, {
         toValue: 1.2,
         useNativeDriver: true,
@@ -21,7 +21,7 @@ const TimeSlot = ({ time, onPress, isSelected, isBooked }) => {
   };
 
   const handlePressOut = () => {
-    if (!isBooked) {
+    if (!isBooked && !isDisabled) {
       Animated.spring(scaleValue, {
         toValue: 1,
         useNativeDriver: true,
@@ -34,19 +34,19 @@ const TimeSlot = ({ time, onPress, isSelected, isBooked }) => {
       style={[
         styles.container,
         isSelected && styles.selectedButton,
-        isBooked && styles.bookedButton,
+        (isBooked || isDisabled) && styles.bookedButton,
         { transform: [{ scale: scaleValue }] },
       ]}
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      disabled={isBooked}
+      disabled={isBooked || isDisabled}
     >
       <Animated.Text
         style={[
           styles.timeText,
           isSelected && styles.selectedText,
-          isBooked && styles.bookedText,
+          (isBooked || isDisabled) && styles.bookedText,
         ]}
       >
         {time?.app_time}

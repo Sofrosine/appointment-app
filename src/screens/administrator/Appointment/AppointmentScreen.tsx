@@ -121,7 +121,7 @@ export default function AppointmentScreen({ navigation }) {
             <View>
               {appointmentList?.map((appointment) => (
                 <CardAppointment
-                  onPressUpdate={() => {
+                  onPressDetail={() => {
                     navigation.navigate("AppointmentDetailScreen", {
                       item: appointment,
                     });

@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -11,9 +11,25 @@ import {
 } from "react-native";
 import Button from "../components/Button";
 import { colors, sizes } from "../styles/Theme";
+import dayjs from "dayjs";
 
 export default function ServiceDetailScreen({ route, navigation }) {
   const { item } = route.params || {};
+
+  const [unavailableDates, setUnavailableDates] = useState([]);
+
+  useEffect(() => {
+    if (item?.unavailable_dates) {
+      const arr = [];
+      Object.keys(item?.unavailable_dates)?.map((val) => {
+        arr.push({
+          date: val,
+          data: item?.unavailable_dates[val],
+        });
+      });
+      setUnavailableDates(arr);
+    }
+  }, [item]);
 
   const shareContent = async () => {
     try {
@@ -86,6 +102,67 @@ export default function ServiceDetailScreen({ route, navigation }) {
           <View style={styles.detail}>
             <Text style={styles.detail_text}>{item?.appointments}</Text>
             <Text style={styles.detail_text}>Completed Appointments</Text>
+          </View>
+        </View>
+        <View
+          style={{
+            marginTop: 24,
+            marginBottom: 40,
+            backgroundColor: colors.color_white,
+            borderRadius: 20,
+            padding: 16,
+          }}
+        >
+          <Text style={styles.about}>Unavailable Date</Text>
+          <View style={{ gap: 16, marginTop: 8 }}>
+            {unavailableDates?.map((item, index) => {
+              return (
+                <View key={item?.date} style={{}}>
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: 16,
+                    }}
+                  >
+                    {index + 1}. {dayjs(item?.date).format("DD MMMM YYYY")}
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      marginLeft: 16,
+                      marginTop: 8,
+                      gap: 4,
+                      flexWrap: "wrap",
+                      flex: 1,
+                    }}
+                  >
+                    {item?.data?.map((data) => {
+                      return (
+                        <View
+                          key={data}
+                          style={{
+                            borderWidth: 1,
+                            borderColor: colors.color_primary,
+                            borderRadius: 20,
+                            paddingHorizontal: 16,
+                            paddingVertical: 8,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: colors.color_primary,
+                              fontWeight: "bold",
+                            }}
+                          >
+                            {data}
+                          </Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+                </View>
+              );
+            })}
           </View>
         </View>
       </ScrollView>

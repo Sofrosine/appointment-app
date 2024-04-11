@@ -115,7 +115,7 @@ export default function CalendarScreen() {
             <View>
               {appointmentList?.map((appointment) => (
                 <CardAppointment
-                  onPressUpdate={null}
+                  onPressDetail={null}
                   appointment={appointment}
                   serviceInfo={appointment?.doctor}
                   key={appointment.id}

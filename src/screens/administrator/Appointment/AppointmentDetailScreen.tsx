@@ -36,12 +36,14 @@ export default function AppointmentDetailScreen({ route, navigation }) {
   const [timeList, setTimeList] = useState([]);
   const [doctorTimeList, setDoctorTimeList] = useState([]);
   const [bookedApps, setBookedApps] = useState([]);
+  const [userData, setUserData] = useState(null);
 
   const today = moment().format("YYYY-MM-DD");
   const threeMonthsLater = moment().add(3, "months").format("YYYY-MM-DD");
 
   useEffect(() => {
     configureNotifications();
+    getUserFromDatabase();
   }, []);
 
   useEffect(() => {
@@ -52,19 +54,23 @@ export default function AppointmentDetailScreen({ route, navigation }) {
     fetchData();
   }, [selectedDate]);
 
-  const unavailableDates = useMemo(() => {
-    const arr = item?.doctor?.unavailable_dates
-      ? [...item?.doctor?.unavailable_dates]
-      : [];
-    const obj = {};
-    arr.forEach((val) => {
-      obj[val] = {
-        disabled: true,
-      };
-    });
+  const getUserFromDatabase = async () => {
+    setLoading(true);
+    try {
+      const dbRef = ref(getDatabase());
+      const snapshot = await get(child(dbRef, "users/" + item?.user_id));
 
-    return obj;
-  }, [item]);
+      if (snapshot.exists()) {
+        setUserData(snapshot.val());
+      } else {
+        console.log("No data time list");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getTimeListFromDatabase = async () => {
     setLoading(true);
@@ -202,6 +208,7 @@ export default function AppointmentDetailScreen({ route, navigation }) {
     try {
       setLoading(true);
       setSelectedDate(day?.dateString);
+      setSelectedTime(null);
 
       await getTimeListFromDatabase();
       await getServiceAppointments(day?.dateString);
@@ -213,7 +220,6 @@ export default function AppointmentDetailScreen({ route, navigation }) {
   };
 
   const onTimeSelect = (time) => {
-    console.log(time);
     setSelectedTime(time);
   };
 
@@ -259,6 +265,30 @@ export default function AppointmentDetailScreen({ route, navigation }) {
           </View>
         </View>
 
+        <View
+          style={{
+            backgroundColor: colors.color_white,
+            paddingHorizontal: 16,
+            paddingBottom: 16,
+            marginVertical: 24,
+            borderRadius: 20,
+          }}
+        >
+          <Text style={[styles.subTitle, {fontSize: 20}]}>User Data</Text>
+          <View style={{flexDirection: 'row', alignItems:'center', gap: 8, marginBottom: 8}}>
+            <Text style={{fontSize: 16}}>Name:</Text>
+            <Text style={{flex: 1, fontSize: 16}}>{userData?.first_name} {userData?.last_name}</Text>
+          </View>
+          <View style={{flexDirection: 'row', alignItems:'center', gap: 8, marginBottom: 8}}>
+            <Text style={{fontSize: 16}}>Email:</Text>
+            <Text style={{flex: 1, fontSize: 16}}>{userData?.email}</Text>
+          </View>
+          <View style={{flexDirection: 'row', alignItems:'center', gap: 8, marginBottom: 8}}>
+            <Text style={{fontSize: 16}}>Phone Number:</Text>
+            <Text style={{flex: 1, fontSize: 16}}>{userData?.phone_number}</Text>
+          </View>
+        </View>
+
         <View style={styles.text_container}>
           <Text style={styles.subTitle}>Select Date:</Text>
         </View>
@@ -273,7 +303,7 @@ export default function AppointmentDetailScreen({ route, navigation }) {
               selectedColor: colors.color_primary,
               selectedTextColor: colors.color_white,
             },
-            ...unavailableDates,
+            // ...unavailableDates,
           }}
           customStyle={{
             today: {
@@ -301,6 +331,16 @@ export default function AppointmentDetailScreen({ route, navigation }) {
                       time={time}
                       onPress={onTimeSelect}
                       isSelected={selectedTime === time?.app_time}
+                      isDisabled={
+                        selectedDate &&
+                        item &&
+                        item?.doctor &&
+                        item?.doctor?.unavailable_dates
+                          ? item?.doctor?.unavailable_dates[
+                              selectedDate
+                            ]?.includes(time?.app_time)
+                          : false
+                      }
                       isBooked={time?.is_booked}
                     />
                   ))}

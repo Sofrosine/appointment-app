@@ -209,7 +209,7 @@ export default function DoctorDetailScreen({ navigation, route }) {
             appointments: formValues.appointments,
             about: formValues.about,
             image_url: imageUrl,
-            unavailable_dates: [],
+            unavailable_dates: {},
             skills: selectedSubCategory ?? [],
             expert_area: {
               ...categories?.filter((val) => val?.id === selectedCategory)[0],

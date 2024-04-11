@@ -14,7 +14,7 @@ export default function CardAppointment({
   appointment,
   serviceInfo,
   onPressCancel,
-  onPressUpdate,
+  onPressDetail,
 }) {
   const {
     type,
@@ -55,11 +55,11 @@ export default function CardAppointment({
               />
             </MenuTrigger>
             <MenuOptions>
-              {onPressUpdate && (
+              {onPressDetail && (
                 <MenuOption
                   style={{ paddingVertical: 8 }}
-                  onSelect={onPressUpdate}
-                  text="Update"
+                  onSelect={onPressDetail}
+                  text="Detail"
                 ></MenuOption>
               )}
               <MenuOption

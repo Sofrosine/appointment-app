@@ -52,19 +52,12 @@ export default function ServiceBookingScreen({ route, navigation }) {
     };
 
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (selectedDate) {
+    }
   }, [selectedDate]);
-
-  const unavailableDates = useMemo(() => {
-    const arr = item?.unavailable_dates ? [...item?.unavailable_dates] : [];
-    const obj = {};
-    arr.forEach((val) => {
-      obj[val] = {
-        disabled: true,
-      };
-    });
-
-    return obj;
-  }, [item]);
 
   const getTimeListFromDatabase = async () => {
     setLoading(true);
@@ -202,9 +195,9 @@ export default function ServiceBookingScreen({ route, navigation }) {
     try {
       setLoading(true);
       setSelectedDate(day?.dateString);
-
-      await getTimeListFromDatabase();
+      setSelectedTime(null)
       await getServiceAppointments(day?.dateString);
+      scrollViewRef.current.scrollToEnd({ animated: true });
     } catch (error) {
       console.error(error);
     } finally {
@@ -230,11 +223,6 @@ export default function ServiceBookingScreen({ route, navigation }) {
         nestedScrollEnabled={true}
         ref={scrollViewRef}
         style={styles.container}
-        onContentSizeChange={(contentWidth, contentHeight) => {
-          if (!loading && scrollViewRef.current) {
-            scrollViewRef.current.scrollToEnd({ animated: true });
-          }
-        }}
       >
         {/* Header */}
         <View style={styles.header_container}>
@@ -274,7 +262,6 @@ export default function ServiceBookingScreen({ route, navigation }) {
               selectedColor: colors.color_primary,
               selectedTextColor: colors.color_white,
             },
-            ...unavailableDates,
           }}
           customStyle={{
             today: {
@@ -302,6 +289,13 @@ export default function ServiceBookingScreen({ route, navigation }) {
                       time={time}
                       onPress={onTimeSelect}
                       isSelected={selectedTime === time?.app_time}
+                      isDisabled={
+                        selectedDate && item?.unavailable_dates
+                          ? item?.unavailable_dates[selectedDate]?.includes(
+                              time?.app_time
+                            )
+                          : false
+                      }
                       isBooked={time?.is_booked}
                     />
                   ))}
