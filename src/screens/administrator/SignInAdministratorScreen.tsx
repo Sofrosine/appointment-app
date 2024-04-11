@@ -110,27 +110,6 @@ const SignInAdministratorScreen = ({ navigation }) => {
                 placeholder={"Password"}
                 secureTextEntry
               />
-              <View
-                style={{
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  flexDirection: "row",
-                }}
-              >
-                <TouchableOpacity style={styles.button}>
-                  <Text style={styles.detail}>Forgot Password?</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.button}>
-                  <Text
-                    style={[
-                      styles.detail,
-                      { color: colors.color_primary, fontWeight: "bold" },
-                    ]}
-                  >
-                    Sign in as administrator
-                  </Text>
-                </TouchableOpacity>
-              </View>
             </View>
             <View style={styles.button_container}>
               <View style={styles.button}>

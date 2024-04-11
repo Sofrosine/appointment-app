@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -16,6 +16,7 @@ const initialFormValues = {
   first_name: "",
   last_name: "",
   email: "",
+  phone_number: "",
   password: "",
   passwordre: "",
 };
@@ -24,64 +25,98 @@ export default function SignUpScreen() {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
 
-  function handleFormSubmit(formValues) {
-    const auth = getAuth(app);
+  const validate = (formValues) => {
+    let isValidate = true;
 
-    if (formValues.password !== formValues.passwordre) {
-      showTopMessage("Passwords do not match, please try again!", "warning");
-      setLoading(false);
-    } else {
-      setLoading(true);
-      createUserWithEmailAndPassword(
-        auth,
-        formValues.email,
-        formValues.password
-      )
-        .then((userCredential) => {
-          const user = userCredential?.user;
-          const uid = user?.uid;
-
-          // Prepare user data
-          const userData = {
-            first_name: formValues.first_name,
-            last_name: formValues.last_name,
-            email: formValues.email,
-            image_url: "",
-            role: ROLES.USER,
-          };
-
-          // Write to the database
-          set(ref(getDatabase(), "users/" + uid), userData)
-            .then(async () => {
-              // await AsyncStorage.setItem(
-              //   "@user_data",
-              //   JSON.stringify(userData)
-              // );
-              dispatch(setUser({ data: userData }));
-              showTopMessage("Registration successful!", "success");
-              setLoading(false);
-              // Consider navigating to the user profile or home screen.
-            })
-            .catch((error) => {
-              showTopMessage("Error saving user data", "danger");
-              console.error(error);
-              // Delete the created user
-              userCredential?.user
-                .delete()
-                .then(() => {
-                  showTopMessage("Registration rolled back.", "warning");
-                })
-                .catch((deleteError) => {
-                  // Handle error during deletion (e.g., log the error)
-                  console.error("Error deleting user:", deleteError);
-                });
-
-              setLoading(false);
-            });
-        })
-        .catch((err) => showTopMessage(ErrorHandler(err?.code), "danger"));
+    if (!formValues?.first_name) {
+      isValidate = false;
     }
-  }
+    if (!formValues?.last_name) {
+      isValidate = false;
+    }
+    if (!formValues?.email) {
+      isValidate = false;
+    }
+    if (!formValues?.phone_number) {
+      isValidate = false;
+    }
+    if (!formValues?.password) {
+      isValidate = false;
+    }
+    if (!formValues?.passwordre) {
+      isValidate = false;
+    }
+
+    if (!isValidate) {
+      showTopMessage("Please complete the form", "warning");
+    }
+    return isValidate;
+  };
+
+  const handleFormSubmit = (formValues) => {
+    if (validate(formValues)) {
+      const auth = getAuth(app);
+
+      if (formValues.password !== formValues.passwordre) {
+        showTopMessage("Passwords do not match, please try again!", "warning");
+        setLoading(false);
+      } else {
+        setLoading(true);
+        createUserWithEmailAndPassword(
+          auth,
+          formValues.email,
+          formValues.password
+        )
+          .then((userCredential) => {
+            const user = userCredential?.user;
+            const uid = user?.uid;
+
+            // Prepare user data
+            const userData = {
+              first_name: formValues.first_name,
+              last_name: formValues.last_name,
+              email: formValues.email,
+              phone_number: formValues.phone_number,
+              image_url: "",
+              role: ROLES.USER,
+            };
+
+            // Write to the database
+            set(ref(getDatabase(), "users/" + uid), userData)
+              .then(async () => {
+                // await AsyncStorage.setItem(
+                //   "@user_data",
+                //   JSON.stringify(userData)
+                // );
+                dispatch(setUser({ data: userData }));
+                showTopMessage("Registration successful!", "success");
+                setLoading(false);
+                // Consider navigating to the user profile or home screen.
+              })
+              .catch((error) => {
+                showTopMessage("Error saving user data", "danger");
+                console.error(error);
+                // Delete the created user
+                userCredential?.user
+                  .delete()
+                  .then(() => {
+                    showTopMessage("Registration rolled back.", "warning");
+                  })
+                  .catch((deleteError) => {
+                    // Handle error during deletion (e.g., log the error)
+                    console.error("Error deleting user:", deleteError);
+                  });
+
+                setLoading(false);
+              });
+          })
+          .catch((err) => {
+            showTopMessage(ErrorHandler(err?.code), "danger");
+            setLoading(false);
+          });
+      }
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -104,6 +139,12 @@ export default function SignUpScreen() {
                 onChangeText={handleChange("email")}
                 value={values.email}
                 placeholder={"Email Address"}
+              />
+              <InputBar
+                onChangeText={handleChange("phone_number")}
+                value={values.phone_number}
+                placeholder={"Phone Number"}
+                keyboardType="number-pad"
               />
               <InputBar
                 onChangeText={handleChange("password")}

@@ -301,8 +301,9 @@ export default function CategoryDetailScreen({ navigation, route }) {
                     ) : (
                       <View />
                     )}
-                    <View style={{ position: "absolute", right: 8, top: 13 }}>
+                    <View style={{ position: "absolute", right: 8, top: 10 }}>
                       <Button
+                      style={{paddingVertical: 0}}
                         text="Add"
                         onPress={() => {
                           handleAddSubCategory(values?.subcategory);
