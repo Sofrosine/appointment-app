@@ -98,7 +98,7 @@ export default function Router() {
   return (
     <>
       <Tab.Navigator screenOptions={iconPref} initialRouteName="Home">
-        {userData?.role === ROLES.USER ? (
+        {userData?.role !== ROLES.ADMIN ? (
           <>
             <Tab.Screen name="Home" component={HomeStack} />
             <Tab.Screen name="Search" component={SearchStack} />

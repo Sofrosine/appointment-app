@@ -7,17 +7,19 @@ import CardSmall from "../components/CardSmall";
 import { showTopMessage } from "../utils/ErrorHandler";
 import { colors } from "../styles/Theme";
 import UploadImage from "../components/UploadImage";
-import { useAppSelector } from "../hooks";
+import { useAppDispatch, useAppSelector } from "../hooks";
+import { setUser } from "../store/slices/auth";
 
 export default function UserProfileScreen({ navigation }) {
   const { data: userData } = useAppSelector((state) => state.authReducer) || {};
-
+  const dispatch = useAppDispatch();
   // Sign out user
   function handleSignOut() {
     const auth = getAuth(app);
 
     signOut(auth)
       .then((res) => {
+        dispatch(setUser(null));
         showTopMessage("Session ended", "success");
         goToSignIn();
       })
