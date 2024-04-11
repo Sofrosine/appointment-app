@@ -49,7 +49,7 @@ export default function DoctorAppointmentScreen({ route, navigation }) {
 
   useEffect(() => {
     if (item) {
-      setUnavailableDates(item?.unavailable_dates);
+      setUnavailableDates(item?.unavailable_dates ?? []);
     }
   }, [item]);
 
@@ -60,7 +60,7 @@ export default function DoctorAppointmentScreen({ route, navigation }) {
   const unavailableDatesMemo = useMemo(() => {
     const arr = unavailableDates ? [...unavailableDates] : [];
     const obj = {};
-    arr.forEach((val) => {
+    arr?.forEach((val) => {
       obj[val] = {
         disabled: true,
       };
@@ -91,7 +91,7 @@ export default function DoctorAppointmentScreen({ route, navigation }) {
   const handleSave = () => {
     let parsedData = parseContentData(selectedDate ?? {});
     parsedData = parsedData?.map((val) => val?.id);
-
+console.log(parsedData, unavailableDates)
     const db = getDatabase(app);
     const doctorRef = ref(db, `doctors/${item?.id}`);
     set(doctorRef, {
