@@ -111,7 +111,12 @@ const SignInScreen = ({ navigation }) => {
                   flexDirection: "row",
                 }}
               >
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate("ForgotPasswordScreen");
+                  }}
+                  style={styles.button}
+                >
                   <Text style={styles.detail}>Forgot Password?</Text>
                 </TouchableOpacity>
                 <TouchableOpacity

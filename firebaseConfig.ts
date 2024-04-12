@@ -23,15 +23,24 @@ const firebaseConfig: FirebaseOptions = {
   // measurementId: "G-M3Y8P239S9",
   // databaseURL:
   //   "https://appointment-doctor-f6f50-default-rtdb.asia-southeast1.firebasedatabase.app",
-  apiKey: "AIzaSyBj2ocEcAhiNeYDB4b8xjz4mY1CyPsmYsM",
-  authDomain: "amc-doctor-b4b07.firebaseapp.com",
-  projectId: "amc-doctor-b4b07",
-  storageBucket: "amc-doctor-b4b07.appspot.com",
-  messagingSenderId: "441320752863",
-  appId: "1:441320752863:web:c9e1cf932539da6b364b6a",
-  measurementId: "G-KH6P7R58BV",
-  databaseURL:
-    "https://amc-doctor-b4b07-default-rtdb.asia-southeast1.firebasedatabase.app/",
+  // apiKey: "AIzaSyBj2ocEcAhiNeYDB4b8xjz4mY1CyPsmYsM",
+  // authDomain: "amc-doctor-b4b07.firebaseapp.com",
+  // projectId: "amc-doctor-b4b07",
+  // storageBucket: "amc-doctor-b4b07.appspot.com",
+  // messagingSenderId: "441320752863",
+  // appId: "1:441320752863:web:c9e1cf932539da6b364b6a",
+  // measurementId: "G-KH6P7R58BV",
+  // databaseURL:
+  //   "https://amc-doctor-b4b07-default-rtdb.asia-southeast1.firebasedatabase.app/",
+
+  apiKey: "AIzaSyB6YMCn9hwE8nS-DrgVgqB9njU5yAsM8dc",
+  authDomain: "booking-app-67479.firebaseapp.com",
+  projectId: "booking-app-67479",
+  storageBucket: "booking-app-67479.appspot.com",
+  messagingSenderId: "1080537463144",
+  appId: "1:1080537463144:web:49ee4cd882d1b836db3edd",
+  measurementId: "G-6YNDZCBZC7",
+  databaseURL: "https://booking-app-67479-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
 
 // Initialize Firebase

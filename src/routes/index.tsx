@@ -28,6 +28,7 @@ import DoctorStack from "./AdminStack/DoctorStack";
 import CategoryStack from "./AdminStack/CategoryStack";
 import AppointmentStack from "./AdminStack/AppointmentStack";
 import ProfileStack from "./ProfileStack";
+import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -38,6 +39,11 @@ function AuthStack() {
       <Stack.Screen
         name="SignInScreen"
         component={SignInScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ForgotPasswordScreen"
+        component={ForgotPasswordScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen
