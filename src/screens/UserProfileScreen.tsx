@@ -9,6 +9,7 @@ import { colors } from "../styles/Theme";
 import UploadImage from "../components/UploadImage";
 import { useAppDispatch, useAppSelector } from "../hooks";
 import { setUser } from "../store/slices/auth";
+import { ROLES } from "../constants";
 
 export default function UserProfileScreen({ navigation }) {
   const { data: userData } = useAppSelector((state) => state.authReducer) || {};
@@ -33,7 +34,7 @@ export default function UserProfileScreen({ navigation }) {
 
   // Navigation
   function goToBookingHistory() {
-    navigation.navigate("BookingHistoryScreen");
+    navigation.navigate("Appointments");
   }
 
   return (
@@ -51,13 +52,25 @@ export default function UserProfileScreen({ navigation }) {
           <UploadImage onSelect={() => {}} />
         </View>
 
-        <CardSmall iconName={"user"} text={"My Account"} />
-        <CardSmall
-          // onSelect={goToBookingHistory}
-          iconName={"list"}
-          text={"My Booking History"}
-        />
-        <CardSmall iconName={"message-square"} text={"Feedback"} />
+        {userData?.role !== ROLES.ADMIN ? (
+          <>
+            <CardSmall
+              onSelect={() => {
+                navigation.navigate("UserProfileDetailScreen");
+              }}
+              iconName={"user"}
+              text={"My Account"}
+            />
+            <CardSmall
+              onSelect={goToBookingHistory}
+              iconName={"list"}
+              text={"My Booking History"}
+            />
+          </>
+        ) : (
+          <View />
+        )}
+        {/* <CardSmall iconName={"message-square"} text={"Feedback"} /> */}
 
         <View style={styles.logo_container}>
           <Text style={styles.logo_text}>AppointMe</Text>

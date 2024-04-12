@@ -51,9 +51,9 @@ export default function ServiceDetailScreen({ route, navigation }) {
     <View style={styles.out_container}>
       <ScrollView style={styles.container}>
         <View style={styles.share_container}>
-          <TouchableOpacity onPress={shareContent}>
+          {/* <TouchableOpacity onPress={shareContent}>
             <Feather name="share" size={24} color={colors.color_primary} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
         {/* Header */}
         <View style={styles.header_container}>

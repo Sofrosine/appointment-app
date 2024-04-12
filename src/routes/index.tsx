@@ -27,6 +27,7 @@ import SearchStack from "./UserStack/SearchStack";
 import DoctorStack from "./AdminStack/DoctorStack";
 import CategoryStack from "./AdminStack/CategoryStack";
 import AppointmentStack from "./AdminStack/AppointmentStack";
+import ProfileStack from "./ProfileStack";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -116,7 +117,7 @@ export default function Router() {
         )}
         <Tab.Screen
           name="Profile"
-          component={getTabScreen(UserProfileScreen, AuthStack)}
+          component={getTabScreen(ProfileStack, AuthStack)}
         />
       </Tab.Navigator>
     </>

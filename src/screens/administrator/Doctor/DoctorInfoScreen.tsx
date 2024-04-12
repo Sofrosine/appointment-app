@@ -60,9 +60,9 @@ export default function DoctorInfoScreen({ route, navigation }) {
           >
             <Feather name="settings" size={24} color={colors.color_primary} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={shareContent}>
+          {/* <TouchableOpacity onPress={shareContent}>
             <Feather name="share" size={24} color={colors.color_primary} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
         {/* Header */}
         <View style={styles.header_container}>
