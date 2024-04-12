@@ -128,7 +128,7 @@ export default function AppointmentScreen({ navigation }) {
                   }}
                   appointment={appointment}
                   serviceInfo={appointment?.doctor}
-                  key={appointment.id}
+                  key={appointment?.child_key}
                   onPressCancel={() => handleCancel(appointment)}
                 />
               ))}

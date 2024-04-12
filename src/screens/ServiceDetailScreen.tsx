@@ -61,14 +61,14 @@ export default function ServiceDetailScreen({ route, navigation }) {
             style={styles.image_container}
             source={{ uri: item?.image_url }}
           />
-          <View>
-            <View style={styles.title_container}>
-              <Text style={styles.title}>
-                {item?.first_name} {item?.last_name}
-              </Text>
-              <Text style={styles.about}>{item?.expert_area?.name} Expert</Text>
-            </View>
-            {/* <View style={styles.location_container}>
+
+          <View style={styles.title_container}>
+            <Text style={styles.title}>
+              {item?.first_name} {item?.last_name}
+            </Text>
+            <Text style={styles.about}>{item?.expert_area?.name} Expert</Text>
+          </View>
+          {/* <View style={styles.location_container}>
               <Ionicons
                 name="ios-location-outline"
                 size={18}
@@ -76,14 +76,13 @@ export default function ServiceDetailScreen({ route, navigation }) {
               />
               <Text style={styles.location}>{item?.district}</Text>
             </View> */}
-          </View>
         </View>
         {/* Body */}
         <View style={styles.body_container}>
           <View style={styles.about_container}>
             <Text style={styles.about}>About</Text>
             <View style={styles.skills_container}>
-              {item?.skills.map((skill, index) => (
+              {item?.skills?.map((skill, index) => (
                 <View key={index} style={styles.chip_container}>
                   <Text style={styles.chips}>{skill}</Text>
                 </View>
@@ -226,11 +225,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontFamily: "Mulish_500Medium",
   },
   about: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: "Mulish_300Light",
     textTransform: "capitalize",
   },

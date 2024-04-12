@@ -84,7 +84,7 @@ export default function DoctorInfoScreen({ route, navigation }) {
           <View style={styles.about_container}>
             <Text style={styles.about}>About</Text>
             <View style={styles.skills_container}>
-              {item?.skills.map((skill, index) => (
+              {item?.skills?.map((skill, index) => (
                 <View key={index} style={styles.chip_container}>
                   <Text style={styles.chips}>{skill}</Text>
                 </View>
