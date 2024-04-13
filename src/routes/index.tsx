@@ -29,6 +29,7 @@ import CategoryStack from "./AdminStack/CategoryStack";
 import AppointmentStack from "./AdminStack/AppointmentStack";
 import ProfileStack from "./ProfileStack";
 import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
+import UserProfileDetailScreen from "../screens/UserProfileDetailScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -59,6 +60,11 @@ function AuthStack() {
       <Stack.Screen
         name="UserProfileScreen"
         component={UserProfileScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="UserProfileDetailScreen"
+        component={UserProfileDetailScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen
