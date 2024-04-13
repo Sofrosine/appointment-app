@@ -13,26 +13,17 @@ import Button from "../components/Button";
 import { ROLES } from "../constants";
 import { useAppSelector } from "../hooks";
 
-const initialFormValues = {
-  first_name: "",
-  last_name: "",
-  email: "",
-  phone_number: "",
-};
-
 export default function UserProfileDetailScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const { data: userData } = useAppSelector((state) => state.authReducer) || {};
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (userData) {
-      initialFormValues.first_name = userData?.first_name;
-      initialFormValues.last_name = userData?.last_name;
-      initialFormValues.email = userData?.email;
-      initialFormValues.phone_number = userData?.phone_number;
-    }
-  }, [userData]);
+  const initialFormValues = {
+    first_name: userData?.first_name ?? "",
+    last_name: userData?.last_name ?? "",
+    email: userData?.email ?? "",
+    phone_number: userData?.phone_number ?? "",
+  };
 
   const validate = (formValues) => {
     let isValidate = true;
