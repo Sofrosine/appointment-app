@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 
-import { child, get, getDatabase, push, ref } from "firebase/database";
+import { child, get, getDatabase, push, ref, set } from "firebase/database";
 import moment from "moment";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Calendar } from "react-native-calendars";
@@ -22,6 +22,7 @@ import {
   handleNotification,
 } from "../utils/NotificationService";
 import parseContentData from "../utils/ParseContentData";
+import { useAppSelector } from "../hooks";
 
 const auth = getAuth(app);
 
@@ -29,6 +30,8 @@ export default function ServiceBookingScreen({ route, navigation }) {
   const { item } = route.params || {};
   const doctorId = item?.id;
   const scrollViewRef = useRef(null);
+
+  const {data: userData} = useAppSelector(state => state.authReducer) || {}
 
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -155,7 +158,7 @@ export default function ServiceBookingScreen({ route, navigation }) {
     }
   };
 
-  const pushAppointment = () => {
+  const pushAppointment =async () => {
     const userId = user?.uid;
     const doctorId = item?.id;
     const type = item?.expert_area;
@@ -164,17 +167,30 @@ export default function ServiceBookingScreen({ route, navigation }) {
 
     const appointmentsRef = ref(getDatabase(), "appointments/" + user?.uid);
 
+     // Retrieve the last used appointment ID
+     const lastAppointmentIdSnapshot = await get(
+      child(ref(getDatabase()), "lastAppointmentId")
+    );
+    let lastAppointmentId = parseInt(lastAppointmentIdSnapshot.val()) || 0;
+
+    // Generate the new appointment ID
+    const newAppointmentId = (lastAppointmentId + 1)
+      .toString()
+      .padStart(4, "0");
+
     push(appointmentsRef, {
       user_id: userId,
+      user: userData,
       doctor_id: doctorId,
       doctor: item,
       type,
+      booked_id: newAppointmentId,
       booked_date: bookedDate,
       booked_time: bookedTime,
     })
       .then(async () => {
         showTopMessage("Your appointment has been created!", "success");
-
+        await set(ref(getDatabase(), "lastAppointmentId"), newAppointmentId);
         handleNotification(
           "Upcoming Appointment",
           `Your appointment for ${bookedDate}, at ${bookedTime} has been created.`

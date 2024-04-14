@@ -60,7 +60,6 @@ export default function AppointmentScreen({ navigation }) {
   };
 
   function removeAppointment(appointment) {
-    console.log(appointment);
     const appointmentsRef = ref(
       getDatabase(),
       "appointments/" + appointment?.user_id + "/" + appointment?.child_key
@@ -119,19 +118,21 @@ export default function AppointmentScreen({ navigation }) {
             <Text style={styles.emptyViewText}>No appointments found!</Text>
           ) : (
             <View>
-              {appointmentList?.map((appointment) => (
-                <CardAppointment
-                  onPressDetail={() => {
-                    navigation.navigate("AppointmentDetailScreen", {
-                      item: appointment,
-                    });
-                  }}
-                  appointment={appointment}
-                  serviceInfo={appointment?.doctor}
-                  key={appointment?.child_key}
-                  onPressCancel={() => handleCancel(appointment)}
-                />
-              ))}
+              {appointmentList?.map((appointment) => {
+                return (
+                  <CardAppointment
+                    onPressDetail={() => {
+                      navigation.navigate("AppointmentDetailScreen", {
+                        item: appointment,
+                      });
+                    }}
+                    appointment={appointment}
+                    serviceInfo={appointment?.doctor}
+                    key={appointment?.child_key}
+                    onPressCancel={() => handleCancel(appointment)}
+                  />
+                );
+              })}
             </View>
           )}
         </View>

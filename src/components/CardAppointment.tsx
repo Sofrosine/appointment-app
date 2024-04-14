@@ -20,6 +20,8 @@ export default function CardAppointment({
     type,
     booked_date: bookedDate,
     booked_time: bookedTime,
+    booked_id: bookedId,
+    user,
   } = appointment;
 
   const fullName = serviceInfo?.first_name + " " + serviceInfo?.last_name;
@@ -40,8 +42,19 @@ export default function CardAppointment({
           </View>
         </View>
         <View style={styles.info_container}>
-          <Text style={styles.appType}>
-            {type?.name}, {fullName}
+          <Text style={[styles.appType, { paddingBottom: 0, fontSize: 14, color: colors.color_primary }]}>
+            #{bookedId} {user?.first_name} {user?.last_name}
+          </Text>
+          <Text
+            style={[
+              styles.appType,
+              { paddingBottom: 0, paddingTop: 0, fontWeight: "bold" },
+            ]}
+          >
+            {type?.name},
+          </Text>
+          <Text style={[styles.appType, { paddingTop: 0 }]} numberOfLines={2}>
+            {fullName}
           </Text>
           <Text style={styles.time}>{bookedTime}</Text>
         </View>

@@ -165,7 +165,7 @@ export default function AppointmentDetailScreen({ route, navigation }) {
     }
   };
 
-  const pushAppointment = () => {
+  const pushAppointment = async () => {
     const userId = item?.user_id;
     const doctorId = item?.doctor_id;
     const type = item?.doctor?.expert_area;
@@ -177,11 +177,24 @@ export default function AppointmentDetailScreen({ route, navigation }) {
       "appointments/" + `${userId}/` + item?.child_key
     );
 
+    // // Retrieve the last used appointment ID
+    // const lastAppointmentIdSnapshot = await get(
+    //   child(ref(getDatabase()), "lastAppointmentId")
+    // );
+    // let lastAppointmentId = parseInt(lastAppointmentIdSnapshot.val()) || 0;
+
+    // // Generate the new appointment ID
+    // const newAppointmentId = (lastAppointmentId + 1)
+    //   .toString()
+    //   .padStart(4, "0");
+
     set(appointmentsRef, {
       user_id: userId,
+      user: userData,
       doctor_id: doctorId,
       doctor: item?.doctor,
       type,
+      booked_id: item?.booked_id,
       booked_date: bookedDate,
       booked_time: bookedTime,
     })
@@ -274,18 +287,43 @@ export default function AppointmentDetailScreen({ route, navigation }) {
             borderRadius: 20,
           }}
         >
-          <Text style={[styles.subTitle, {fontSize: 20}]}>User Data</Text>
-          <View style={{flexDirection: 'row', alignItems:'center', gap: 8, marginBottom: 8}}>
-            <Text style={{fontSize: 16}}>Name:</Text>
-            <Text style={{flex: 1, fontSize: 16}}>{userData?.first_name} {userData?.last_name}</Text>
+          <Text style={[styles.subTitle, { fontSize: 20 }]}>User Data</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 8,
+            }}
+          >
+            <Text style={{ fontSize: 16 }}>Name:</Text>
+            <Text style={{ flex: 1, fontSize: 16 }}>
+              {userData?.first_name} {userData?.last_name}
+            </Text>
           </View>
-          <View style={{flexDirection: 'row', alignItems:'center', gap: 8, marginBottom: 8}}>
-            <Text style={{fontSize: 16}}>Email:</Text>
-            <Text style={{flex: 1, fontSize: 16}}>{userData?.email}</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 8,
+            }}
+          >
+            <Text style={{ fontSize: 16 }}>Email:</Text>
+            <Text style={{ flex: 1, fontSize: 16 }}>{userData?.email}</Text>
           </View>
-          <View style={{flexDirection: 'row', alignItems:'center', gap: 8, marginBottom: 8}}>
-            <Text style={{fontSize: 16}}>Phone Number:</Text>
-            <Text style={{flex: 1, fontSize: 16}}>{userData?.phone_number}</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 8,
+            }}
+          >
+            <Text style={{ fontSize: 16 }}>Phone Number:</Text>
+            <Text style={{ flex: 1, fontSize: 16 }}>
+              {userData?.phone_number}
+            </Text>
           </View>
         </View>
 

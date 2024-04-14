@@ -99,45 +99,50 @@ export default function CalendarScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={{ flex: 1 }}>
       <Text style={styles.header_text}>My Appointments</Text>
-      {loading ? (
-        <ActivityIndicator
-          style={styles.loading_container}
-          size="large"
-          color={colors.color_primary}
-        />
-      ) : (
-        <View style={styles.list_container}>
-          {appointmentList.length === 0 ? (
-            <Text style={styles.emptyViewText}>No appointments found!</Text>
-          ) : (
-            <View>
-              {appointmentList?.map((appointment) => (
-                <CardAppointment
-                  onPressDetail={null}
-                  appointment={appointment}
-                  serviceInfo={appointment?.doctor}
-                  key={appointment.id}
-                  onPressCancel={() => handleCancel(appointment)}
-                />
-              ))}
-            </View>
-          )}
-        </View>
-      )}
-    </ScrollView>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
+        {loading ? (
+          <ActivityIndicator
+            style={styles.loading_container}
+            size="large"
+            color={colors.color_primary}
+          />
+        ) : (
+          <View style={styles.list_container}>
+            {appointmentList.length === 0 ? (
+              <Text style={styles.emptyViewText}>No appointments found!</Text>
+            ) : (
+              <View>
+                {appointmentList?.map((appointment) => (
+                  <CardAppointment
+                    onPressDetail={null}
+                    appointment={appointment}
+                    serviceInfo={appointment?.doctor}
+                    key={appointment.id}
+                    onPressCancel={() => handleCancel(appointment)}
+                  />
+                ))}
+              </View>
+            )}
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 48,
   },
   header_text: {
     marginHorizontal: 24,
-    marginVertical: 16,
+    marginTop: 48,
+    marginBottom: 16,
     fontSize: 30,
     fontFamily: "Mulish_500Medium",
   },
