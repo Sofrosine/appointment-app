@@ -6,6 +6,7 @@ import {
 } from "react-native";
 import styles from "./Button.style";
 import { FC } from "react";
+import { colors } from "../../styles/Theme";
 
 interface Props {
   onPress: () => void;
@@ -13,6 +14,7 @@ interface Props {
   text: string;
   theme?: "primary" | "secondary";
   style?: ViewStyle;
+  disabled?: boolean;
 }
 
 export default function Button({
@@ -21,16 +23,17 @@ export default function Button({
   text,
   theme = "primary",
   style,
+  disabled,
 }: Props) {
   return (
     <TouchableOpacity
-      style={[styles[theme].container, style]}
+      style={[styles[theme].container, disabled && {backgroundColor: colors.color_gray}, style]}
       onPress={() => {
-        if (!loading) {
+        if (!loading || !disabled) {
           onPress && onPress();
         }
       }}
-      disabled={loading}
+      disabled={loading || disabled}
     >
       {loading ? (
         <ActivityIndicator style={styles[theme].activity_icon} color="white" />

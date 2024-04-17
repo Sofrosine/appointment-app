@@ -13,7 +13,7 @@ import Button from "../../../components/Button";
 import InputBar from "../../../components/InputBar";
 import { colors } from "../../../styles/Theme";
 import UploadImage from "../../../components/UploadImage";
-import { showTopMessage } from "../../../utils/ErrorHandler";
+import ErrorHandler, { showTopMessage } from "../../../utils/ErrorHandler";
 import { FontAwesome } from "@expo/vector-icons";
 import {
   deleteObject,
@@ -34,12 +34,18 @@ import {
 import parseContentData from "../../../utils/ParseContentData";
 import DropDownPicker from "react-native-dropdown-picker";
 import { Image } from "expo-image";
+import {
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth";
+import { ROLES } from "../../../constants";
 
 const auth = getAuth(app);
 
 let initialFormValues = {
   first_name: "",
   last_name: "",
+  email: "",
   about: "",
   appointments: "",
   yoe: "",
@@ -65,6 +71,7 @@ export default function DoctorDetailScreen({ navigation, route }) {
       setSelectedSubCategory(doctor?.skills);
       initialFormValues.first_name = doctor?.first_name;
       initialFormValues.last_name = doctor?.last_name;
+      initialFormValues.email = doctor?.email;
       initialFormValues.about = doctor?.about;
       initialFormValues.appointments = doctor?.appointments;
       initialFormValues.yoe = doctor?.yoe;
@@ -107,6 +114,7 @@ export default function DoctorDetailScreen({ navigation, route }) {
       initialFormValues = {
         first_name: "",
         last_name: "",
+        email: "",
         about: "",
         appointments: "",
         yoe: "",
@@ -168,6 +176,9 @@ export default function DoctorDetailScreen({ navigation, route }) {
     if (formValues?.last_name === "") {
       isValidate = false;
     }
+    if (formValues?.email === "") {
+      isValidate = false;
+    }
     if (formValues?.about === "") {
       isValidate = false;
     }
@@ -194,33 +205,87 @@ export default function DoctorDetailScreen({ navigation, route }) {
             return;
           }
         }
+        if (!doctor) {
+          await createUserWithEmailAndPassword(auth, formValues.email, "app123")
+            .then(async (userCredential) => {
+              const user = userCredential?.user;
+              const uid = user?.uid;
 
-        // Upload image to Firebase Storage
-        const imageUrl = image
-          ? await uploadImageToFirebase(image)
-          : defaultImage;
+              await sendPasswordResetEmail(auth, formValues?.email)
+                .then(async () => {
+                  const imageUrl = image
+                    ? await uploadImageToFirebase(image)
+                    : defaultImage;
 
-        if (imageUrl) {
-          // Save category data to Firebase Realtime Database
-          await saveDoctorToFirebase({
-            first_name: formValues.first_name,
-            last_name: formValues.last_name,
-            yoe: formValues.yoe,
-            appointments: formValues.appointments,
-            about: formValues.about,
-            image_url: imageUrl,
-            unavailable_dates: {},
-            skills: selectedSubCategory ?? [],
-            expert_area: {
-              ...categories?.filter((val) => val?.id === selectedCategory)[0],
-              icon: categories?.filter((val) => val?.id === selectedCategory)[0]
-                ?.icon_url,
-            },
-          });
+                  if (imageUrl) {
+                    // Save category data to Firebase Realtime Database
+                    await saveDoctorToFirebase(
+                      {
+                        first_name: formValues.first_name,
+                        last_name: formValues.last_name,
+                        email: formValues.email,
+                        yoe: formValues.yoe,
+                        appointments: formValues.appointments,
+                        role: ROLES.DOCTOR,
+                        about: formValues.about,
+                        image_url: imageUrl,
+                        unavailable_dates: {},
+                        skills: selectedSubCategory ?? [],
+                        expert_area: {
+                          ...categories?.filter(
+                            (val) => val?.id === selectedCategory
+                          )[0],
+                          icon: categories?.filter(
+                            (val) => val?.id === selectedCategory
+                          )[0]?.icon_url,
+                        },
+                      },
+                      uid
+                    );
+                  } else {
+                    showTopMessage("Error upload image", "danger");
+                    setLoading(false);
+                    return;
+                  }
+                })
+                .finally(() => {
+                  setLoading(false);
+                });
+            })
+            .catch((err) => {
+              showTopMessage(ErrorHandler(err?.code), "danger");
+              setLoading(false);
+            });
         } else {
-          showTopMessage("Error upload image", "danger");
-          setLoading(false);
-          return;
+          const imageUrl = image
+            ? await uploadImageToFirebase(image)
+            : defaultImage;
+
+          if (imageUrl) {
+            // Save category data to Firebase Realtime Database
+            await saveDoctorToFirebase({
+              first_name: formValues.first_name,
+              last_name: formValues.last_name,
+              email: formValues.email,
+              yoe: formValues.yoe,
+              appointments: formValues.appointments,
+              role: ROLES.DOCTOR,
+              about: formValues.about,
+              image_url: imageUrl,
+              unavailable_dates: {},
+              skills: selectedSubCategory ?? [],
+              expert_area: {
+                ...categories?.filter((val) => val?.id === selectedCategory)[0],
+                icon: categories?.filter(
+                  (val) => val?.id === selectedCategory
+                )[0]?.icon_url,
+              },
+            });
+          } else {
+            showTopMessage("Error upload image", "danger");
+            setLoading(false);
+            return;
+          }
         }
       } catch (error) {
         console.error("Error submitting form:", error);
@@ -260,12 +325,12 @@ export default function DoctorDetailScreen({ navigation, route }) {
     });
   };
 
-  const saveDoctorToFirebase = async (doctorData) => {
+  const saveDoctorToFirebase = async (doctorData: any, uid?: string) => {
     const db = getDatabase(app);
-    const newCategoryRef = doctor
+    const doctorRef = doctor
       ? ref(db, `doctors/${doctor?.id}`)
-      : push(child(ref(db), "doctors"));
-    set(newCategoryRef, doctorData)
+      : ref(db, "doctors/" + uid);
+    set(doctorRef, doctorData)
       .then(async () => {
         // Reset form values and state
         setImage(null);
@@ -273,9 +338,7 @@ export default function DoctorDetailScreen({ navigation, route }) {
 
         // Show success message or navigate to next screen
         showTopMessage(
-          doctor
-            ? "Category update successfully"
-            : "Category added successfully",
+          doctor ? "Doctor update successfully" : "Doctor added successfully",
           "success"
         );
         if (doctor) {
@@ -349,6 +412,11 @@ export default function DoctorDetailScreen({ navigation, route }) {
                     onChangeText={handleChange("last_name")}
                     value={values.last_name}
                     placeholder={"Last Name"}
+                  />
+                  <InputBar
+                    onChangeText={handleChange("email")}
+                    value={values.email}
+                    placeholder={"Email"}
                   />
                   <View
                     style={{ marginBottom: subCategory?.length > 0 ? 16 : 8 }}

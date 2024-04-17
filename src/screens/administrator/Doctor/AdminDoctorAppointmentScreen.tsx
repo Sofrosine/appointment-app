@@ -1,33 +1,28 @@
 import {
   ActivityIndicator,
-  Alert,
   Image,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 
-import { child, get, getDatabase, push, ref, set } from "firebase/database";
-import moment from "moment";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { child, get, getDatabase, ref, set } from "firebase/database";
+
+import dayjs from "dayjs";
+import React, { useEffect, useRef, useState } from "react";
 import { Calendar } from "react-native-calendars";
 import { app, getAuth } from "../../../../firebaseConfig";
 import Button from "../../../components/Button";
 import TimeSlot from "../../../components/TimeSlot";
 import { colors } from "../../../styles/Theme";
 import { showTopMessage } from "../../../utils/ErrorHandler";
-import {
-  configureNotifications,
-  handleNotification,
-} from "../../../utils/NotificationService";
+import { configureNotifications } from "../../../utils/NotificationService";
 import parseContentData from "../../../utils/ParseContentData";
-import { FontAwesome } from "@expo/vector-icons";
 
 const auth = getAuth(app);
 
-export default function DoctorAppointmentScreen({ route, navigation }) {
+export default function AdminDoctorAppointmentScreen({ route, navigation }) {
   const { item } = route.params || {};
 
   const scrollViewRef = useRef(null);
@@ -40,8 +35,8 @@ export default function DoctorAppointmentScreen({ route, navigation }) {
   const [timeList, setTimeList] = useState([]);
   const [selectedTimes, setSelectedTimes] = useState([]);
 
-  const today = moment().format("YYYY-MM-DD");
-  const threeMonthsLater = moment().add(3, "months").format("YYYY-MM-DD");
+  const today = dayjs().format("YYYY-MM-DD");
+  const threeMonthsLater = dayjs().add(3, "months").format("YYYY-MM-DD");
 
   useEffect(() => {
     configureNotifications();

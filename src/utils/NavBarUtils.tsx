@@ -12,7 +12,10 @@ const iconPref: any = ({ route }) => {
         iconName = "home";
       } else if (route.name === "Profile") {
         iconName = "user";
-      } else if (route.name === "Appointments") {
+      } else if (
+        route.name === "Appointments" ||
+        route.name === "DoctorAppointments"
+      ) {
         iconName = "calendar";
       } else if (route.name === "Search") {
         iconName = "search";

@@ -8,9 +8,9 @@ import {
   View,
 } from "react-native";
 
-import { child, get, getDatabase, push, ref, set } from "firebase/database";
-import moment from "moment";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import dayjs from "dayjs";
+import { child, get, getDatabase, ref, set } from "firebase/database";
+import React, { useEffect, useRef, useState } from "react";
 import { Calendar } from "react-native-calendars";
 import { app, getAuth } from "../../../../firebaseConfig";
 import Button from "../../../components/Button";
@@ -38,8 +38,8 @@ export default function AppointmentDetailScreen({ route, navigation }) {
   const [bookedApps, setBookedApps] = useState([]);
   const [userData, setUserData] = useState(null);
 
-  const today = moment().format("YYYY-MM-DD");
-  const threeMonthsLater = moment().add(3, "months").format("YYYY-MM-DD");
+  const today = dayjs().format("YYYY-MM-DD");
+  const threeMonthsLater = dayjs().add(3, "months").format("YYYY-MM-DD");
 
   useEffect(() => {
     configureNotifications();

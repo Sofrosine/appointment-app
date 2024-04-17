@@ -44,7 +44,7 @@ export default function DoctorInfoScreen({ route, navigation }) {
 
   //NAVIGATION
   const goToBookingScreen = (item) => {
-    navigation.navigate("DoctorAppointmentScreen", { item });
+    navigation.navigate("AdminDoctorAppointmentScreen", { item });
   };
 
   return (

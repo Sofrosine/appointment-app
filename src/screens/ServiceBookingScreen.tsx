@@ -5,16 +5,19 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 
+import { FontAwesome } from "@expo/vector-icons";
+import dayjs from "dayjs";
 import { child, get, getDatabase, push, ref, set } from "firebase/database";
-import moment from "moment";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Calendar } from "react-native-calendars";
 import { app, getAuth } from "../../firebaseConfig";
 import Button from "../components/Button";
 import TimeSlot from "../components/TimeSlot";
+import { useAppSelector } from "../hooks";
 import { colors } from "../styles/Theme";
 import { showTopMessage } from "../utils/ErrorHandler";
 import {
@@ -22,7 +25,6 @@ import {
   handleNotification,
 } from "../utils/NotificationService";
 import parseContentData from "../utils/ParseContentData";
-import { useAppSelector } from "../hooks";
 
 const auth = getAuth(app);
 
@@ -31,7 +33,7 @@ export default function ServiceBookingScreen({ route, navigation }) {
   const doctorId = item?.id;
   const scrollViewRef = useRef(null);
 
-  const {data: userData} = useAppSelector(state => state.authReducer) || {}
+  const { data: userData } = useAppSelector((state) => state.authReducer) || {};
 
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -39,9 +41,12 @@ export default function ServiceBookingScreen({ route, navigation }) {
   const [timeList, setTimeList] = useState([]);
   const [doctorTimeList, setDoctorTimeList] = useState([]);
   const [bookedApps, setBookedApps] = useState([]);
+  const [appointmentType, setAppointmentType] = useState<"audio" | "video">(
+    "audio"
+  );
 
-  const today = moment().format("YYYY-MM-DD");
-  const threeMonthsLater = moment().add(3, "months").format("YYYY-MM-DD");
+  const today = dayjs().format("YYYY-MM-DD");
+  const threeMonthsLater = dayjs().add(3, "months").format("YYYY-MM-DD");
 
   const user = auth?.currentUser;
 
@@ -120,6 +125,7 @@ export default function ServiceBookingScreen({ route, navigation }) {
 
         setDoctorTimeList(availableTimes);
       } else {
+        setDoctorTimeList(timeList);
         console.log("No data");
       }
     } catch (error) {
@@ -158,7 +164,7 @@ export default function ServiceBookingScreen({ route, navigation }) {
     }
   };
 
-  const pushAppointment =async () => {
+  const pushAppointment = async () => {
     const userId = user?.uid;
     const doctorId = item?.id;
     const type = item?.expert_area;
@@ -167,8 +173,8 @@ export default function ServiceBookingScreen({ route, navigation }) {
 
     const appointmentsRef = ref(getDatabase(), "appointments/" + user?.uid);
 
-     // Retrieve the last used appointment ID
-     const lastAppointmentIdSnapshot = await get(
+    // Retrieve the last used appointment ID
+    const lastAppointmentIdSnapshot = await get(
       child(ref(getDatabase()), "lastAppointmentId")
     );
     let lastAppointmentId = parseInt(lastAppointmentIdSnapshot.val()) || 0;
@@ -187,6 +193,7 @@ export default function ServiceBookingScreen({ route, navigation }) {
       booked_id: newAppointmentId,
       booked_date: bookedDate,
       booked_time: bookedTime,
+      appointment_type: appointmentType,
     })
       .then(async () => {
         showTopMessage("Your appointment has been created!", "success");
@@ -211,7 +218,7 @@ export default function ServiceBookingScreen({ route, navigation }) {
     try {
       setLoading(true);
       setSelectedDate(day?.dateString);
-      setSelectedTime(null)
+      setSelectedTime(null);
       await getServiceAppointments(day?.dateString);
       scrollViewRef.current.scrollToEnd({ animated: true });
     } catch (error) {
@@ -262,6 +269,72 @@ export default function ServiceBookingScreen({ route, navigation }) {
               <Text style={styles.location}>{item?.district}</Text>
             </View> */}
           </View>
+        </View>
+
+        <View style={styles.text_container}>
+          <Text style={styles.subTitle}>Select Appointment Type:</Text>
+        </View>
+        <View style={{ flexDirection: "row", gap: 8 }}>
+          <TouchableOpacity
+            onPress={() => {
+              setAppointmentType("audio");
+            }}
+            style={[
+              styles.inactiveType,
+              {
+                backgroundColor:
+                  appointmentType === "audio"
+                    ? colors.color_primary
+                    : "transparent",
+              },
+            ]}
+          >
+            <FontAwesome
+              color={appointmentType === "audio" ? colors.color_white : "black"}
+              size={20}
+              name="music"
+            />
+            <Text
+              style={{
+                fontFamily: "Mulish_500Medium",
+                fontSize: 14,
+                color:
+                  appointmentType === "audio" ? colors.color_white : "black",
+              }}
+            >
+              Audio
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setAppointmentType("video");
+            }}
+            style={[
+              styles.inactiveType,
+              {
+                backgroundColor:
+                  appointmentType === "video"
+                    ? colors.color_primary
+                    : "transparent",
+              },
+            ]}
+          >
+            <FontAwesome
+              color={appointmentType === "video" ? colors.color_white : "black"}
+              size={20}
+              name="video-camera"
+            />
+            <Text
+              style={{
+                fontFamily: "Mulish_500Medium",
+                fontSize: 14,
+                color:
+                  appointmentType === "video" ? colors.color_white : "black",
+              }}
+            >
+              Video Call
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.text_container}>
@@ -329,6 +402,17 @@ export default function ServiceBookingScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
+  inactiveType: {
+    borderWidth: 1,
+    borderColor: colors.color_primary,
+    borderRadius: 8,
+    padding: 8,
+    height: 80,
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+    gap: 8,
+  },
   out_container: { flex: 1 },
   container: {
     flexGrow: 1,

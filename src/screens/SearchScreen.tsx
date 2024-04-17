@@ -8,6 +8,7 @@ import { colors, sizes } from "../styles/Theme";
 import { filterServicesByCategory } from "../utils/CategoryUtils";
 import { showTopMessage } from "../utils/ErrorHandler";
 import parseContentData from "../utils/ParseContentData";
+import { useAppSelector } from "../hooks";
 
 export default function SearchScreen({ navigation, route }) {
   const [loading, setLoading] = useState(true);
@@ -17,6 +18,7 @@ export default function SearchScreen({ navigation, route }) {
   const [selectedCategory, setSelectedCategory] = useState("");
 
   const category = route.params?.category;
+  const { data: userData } = useAppSelector((state) => state.authReducer) || {};
 
   useEffect(() => {
     const dbRef = ref(getDatabase());
@@ -60,7 +62,7 @@ export default function SearchScreen({ navigation, route }) {
       .catch((error) => {
         console.error(error);
       });
-  }, []);
+  }, [userData]);
 
   useEffect(() => {
     if (category) {

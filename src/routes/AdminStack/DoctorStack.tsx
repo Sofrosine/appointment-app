@@ -2,7 +2,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import DoctorScreen from "../../screens/administrator/Doctor/DoctorScreen";
 import DoctorDetailScreen from "../../screens/administrator/Doctor/DoctorDetailScreen";
 import DoctorInfoScreen from "../../screens/administrator/Doctor/DoctorInfoScreen";
-import DoctorAppointmentScreen from "../../screens/administrator/Doctor/DoctorAppointmentScreen";
+import AdminDoctorAppointmentScreen from "../../screens/administrator/Doctor/AdminDoctorAppointmentScreen";
 
 const Stack = createStackNavigator();
 export default function DoctorStack() {
@@ -24,8 +24,8 @@ export default function DoctorStack() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="DoctorAppointmentScreen"
-        component={DoctorAppointmentScreen}
+        name="AdminDoctorAppointmentScreen"
+        component={AdminDoctorAppointmentScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

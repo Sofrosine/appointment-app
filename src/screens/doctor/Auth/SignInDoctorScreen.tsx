@@ -1,32 +1,33 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import InputBar from "../components/InputBar";
+import InputBar from "../../../components/InputBar";
 import {
   browserLocalPersistence,
   getAuth,
   signInWithEmailAndPassword,
+  signOut,
 } from "firebase/auth";
-import { app } from "../../firebaseConfig";
+import { app } from "../../../../firebaseConfig";
 import { Formik } from "formik";
-import ErrorHandler, { showTopMessage } from "../utils/ErrorHandler";
-import { colors } from "../styles/Theme";
+import ErrorHandler, { showTopMessage } from "../../../utils/ErrorHandler";
+import { colors } from "../../../styles/Theme";
 import { getDatabase, onValue, ref } from "firebase/database";
 import { useDispatch } from "react-redux";
-import { setUser } from "../store/slices/auth";
-import Button from "../components/Button";
+import { setUser } from "../../../store/slices/auth";
+import Button from "../../../components/Button";
 
 const initialFormValues = {
   usermail: "",
   password: "",
 };
 
-const SignInScreen = ({ navigation }) => {
+const auth = getAuth(app);
+
+const SignInDoctorScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
 
   function handleFormSubmit(formValues) {
-    const auth = getAuth(app);
-
     setLoading(true); // Enable loading when the process starts
 
     signInWithEmailAndPassword(auth, formValues.usermail, formValues.password)
@@ -42,7 +43,7 @@ const SignInScreen = ({ navigation }) => {
 
   const fetchUserData = (uid) => {
     const database = getDatabase(app);
-    const userRef = ref(database, "users/" + uid);
+    const userRef = ref(database, "doctors/" + uid);
 
     onValue(
       userRef,
@@ -51,7 +52,7 @@ const SignInScreen = ({ navigation }) => {
           const userData = snapshot.val();
           storeData(userData); // Store data in AsyncStorage
         } else {
-          console.log("User data not found.");
+          console.log("Doctor data not found.");
         }
       },
       {
@@ -88,7 +89,7 @@ const SignInScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}> Sign In </Text>
+      <Text style={styles.text}> Sign In Doctor</Text>
       <Formik initialValues={initialFormValues} onSubmit={handleFormSubmit}>
         {({ values, handleChange, handleSubmit }) => (
           <>
@@ -104,22 +105,6 @@ const SignInScreen = ({ navigation }) => {
                 placeholder={"Password"}
                 secureTextEntry
               />
-              <View
-                style={{
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  flexDirection: "row",
-                }}
-              >
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.navigate("ForgotPasswordScreen");
-                  }}
-                  style={styles.button}
-                >
-                  <Text style={styles.detail}>Forgot Password?</Text>
-                </TouchableOpacity>
-              </View>
             </View>
             <View style={styles.button_container}>
               <View style={styles.button}>
@@ -129,50 +114,6 @@ const SignInScreen = ({ navigation }) => {
                   loading={loading}
                 />
               </View>
-              <View style={styles.button}>
-                <Button
-                  text="Sign Up"
-                  onPress={goToMemberSignUp}
-                  theme="secondary"
-                />
-              </View>
-            </View>
-            <View
-              style={{
-                alignItems: "center",
-                gap: 8,
-                borderTopWidth: 1,
-                marginTop: 16,
-                paddingTop: 16,
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => navigation.navigate("SignInAdministratorScreen")}
-                style={styles.button}
-              >
-                <Text
-                  style={[
-                    styles.detail,
-                    { color: colors.color_primary, fontWeight: "bold" },
-                  ]}
-                >
-                  Sign in as an administrator
-                </Text>
-              </TouchableOpacity>
-              <Text style={[styles.detail, { fontWeight: "bold" }]}>Or</Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate("SignInDoctorScreen")}
-                style={styles.button}
-              >
-                <Text
-                  style={[
-                    styles.detail,
-                    { color: colors.color_primary, fontWeight: "bold" },
-                  ]}
-                >
-                  Sign in as a doctor
-                </Text>
-              </TouchableOpacity>
             </View>
           </>
         )}
@@ -207,4 +148,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignInScreen;
+export default SignInDoctorScreen;

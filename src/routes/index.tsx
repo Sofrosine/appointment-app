@@ -2,34 +2,30 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import * as React from "react";
 import BookingHistoryScreen from "../screens/BookingHistoryScreen";
-import CalendarScreen from "../screens/CalendarScreen";
 import FeedBackScreen from "../screens/FeedBackScreen";
-import HomeScreen from "../screens/HomeScreen";
-import MapScreen from "../screens/MapScreen";
-import NotificationsScreen from "../screens/NotificationsScreen";
-import SearchScreen from "../screens/SearchScreen";
 import ServiceBookingScreen from "../screens/ServiceBookingScreen";
-import ServiceDetailScreen from "../screens/ServiceDetailScreen";
 import SignInScreen from "../screens/SignInScreen";
 import SignUpScreen from "../screens/SignUpScreen";
 import UserInfosScreen from "../screens/UserInfosScreen";
 import UserProfileScreen from "../screens/UserProfileScreen";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { app, getAuth } from "../../firebaseConfig";
-import SignInAdministratorScreen from "../screens/administrator/SignInAdministratorScreen";
-import iconPref from "../utils/NavBarUtils";
-import { useAppSelector } from "../hooks";
 import { ROLES } from "../constants";
-import HomeStack from "./UserStack/HomeStack";
-import SearchStack from "./UserStack/SearchStack";
-import DoctorStack from "./AdminStack/DoctorStack";
-import CategoryStack from "./AdminStack/CategoryStack";
-import AppointmentStack from "./AdminStack/AppointmentStack";
-import ProfileStack from "./ProfileStack";
+import { useAppSelector } from "../hooks";
 import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import UserProfileDetailScreen from "../screens/UserProfileDetailScreen";
+import SignInAdministratorScreen from "../screens/administrator/SignInAdministratorScreen";
+import SignInDoctorScreen from "../screens/doctor/Auth/SignInDoctorScreen";
+import iconPref from "../utils/NavBarUtils";
+import AppointmentStack from "./AdminStack/AppointmentStack";
+import CategoryStack from "./AdminStack/CategoryStack";
+import DoctorStack from "./AdminStack/DoctorStack";
+import DoctorAppointmentStack from "./DoctorStack/DoctorAppointmentStack";
+import ProfileStack from "./ProfileStack";
+import HomeStack from "./UserStack/HomeStack";
+import SearchStack from "./UserStack/SearchStack";
+import UserAppointmentStack from "./UserStack/UserAppointmentStack";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -50,6 +46,11 @@ function AuthStack() {
       <Stack.Screen
         name="SignInAdministratorScreen"
         component={SignInAdministratorScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="SignInDoctorScreen"
+        component={SignInDoctorScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen
@@ -111,20 +112,27 @@ export default function Router() {
   return (
     <>
       <Tab.Navigator screenOptions={iconPref} initialRouteName="Home">
-        {userData?.role !== ROLES.ADMIN ? (
+        {userData?.role === ROLES.USER ? (
           <>
             <Tab.Screen name="Home" component={HomeStack} />
             <Tab.Screen name="Search" component={SearchStack} />
             <Tab.Screen
               name="Appointments"
-              component={getTabScreen(CalendarScreen, AuthStack)}
+              component={getTabScreen(UserAppointmentStack, AuthStack)}
             />
           </>
-        ) : (
+        ) : userData?.role === ROLES.ADMIN ? (
           <>
             <Tab.Screen name="Doctor" component={DoctorStack} />
             <Tab.Screen name="Appointments" component={AppointmentStack} />
             <Tab.Screen name="Category" component={CategoryStack} />
+          </>
+        ) : (
+          <>
+            <Tab.Screen
+              name="DoctorAppointments"
+              component={DoctorAppointmentStack}
+            />
           </>
         )}
         <Tab.Screen
