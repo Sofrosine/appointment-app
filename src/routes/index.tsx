@@ -112,13 +112,11 @@ export default function Router() {
   return (
     <>
       <Tab.Navigator screenOptions={iconPref} initialRouteName="Home">
-        {userData?.role === ROLES.USER ? (
+        {userData?.role === ROLES.DOCTOR ? (
           <>
-            <Tab.Screen name="Home" component={HomeStack} />
-            <Tab.Screen name="Search" component={SearchStack} />
             <Tab.Screen
-              name="Appointments"
-              component={getTabScreen(UserAppointmentStack, AuthStack)}
+              name="DoctorAppointments"
+              component={DoctorAppointmentStack}
             />
           </>
         ) : userData?.role === ROLES.ADMIN ? (
@@ -129,9 +127,11 @@ export default function Router() {
           </>
         ) : (
           <>
+            <Tab.Screen name="Home" component={HomeStack} />
+            <Tab.Screen name="Search" component={SearchStack} />
             <Tab.Screen
-              name="DoctorAppointments"
-              component={DoctorAppointmentStack}
+              name="Appointments"
+              component={getTabScreen(UserAppointmentStack, AuthStack)}
             />
           </>
         )}

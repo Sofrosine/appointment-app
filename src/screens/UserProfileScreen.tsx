@@ -54,7 +54,7 @@ export default function UserProfileScreen({ navigation }) {
             <UploadImage onSelect={() => {}} />
           </View>
 
-          {userData?.role !== ROLES.ADMIN ? (
+          {userData?.role === ROLES.USER ? (
             <>
               <CardSmall
                 onSelect={() => {
