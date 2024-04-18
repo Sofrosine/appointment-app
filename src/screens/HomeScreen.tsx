@@ -125,7 +125,7 @@ export default function HomeScreen({ navigation }) {
 
   // NAVIGATION
   const goToCalendar = () => {
-    navigation.navigate("CalendarScreen");
+    navigation.navigate("Appointments");
   };
 
   // NAVIGATION
@@ -134,7 +134,7 @@ export default function HomeScreen({ navigation }) {
   };
 
   const handleSearch = () => {
-    navigation.navigate("SearchScreen");
+    navigation.navigate("Search");
   };
 
   const handleCategorySelect = (selectedCategory) => {

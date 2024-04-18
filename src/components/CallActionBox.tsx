@@ -3,7 +3,13 @@ import React, { useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors } from "../styles/Theme";
 
-const CallActionBox = ({ switchCamera, toggleMute, toggleCamera, endCall }) => {
+const CallActionBox = ({
+  switchCamera,
+  toggleMute,
+  toggleCamera,
+  endCall,
+  callType,
+}) => {
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isMicOn, setIsMicOn] = useState(true);
 
@@ -26,32 +32,52 @@ const CallActionBox = ({ switchCamera, toggleMute, toggleCamera, endCall }) => {
         marginBottom: 16,
       }}
     >
-      <Pressable
-        onPress={switchCamera}
-        // className="bg-gray-600 p-3 rounded-full"
-        style={{ borderRadius: 100, padding: 12, backgroundColor: colors.color_gray}}
-      >
-        <Text>
-          <MaterialIcons name={"flip-camera-ios"} size={35} color={"white"} />
-        </Text>
-      </Pressable>
-      <Pressable
-        onPress={onToggleCamera}
-        // className="bg-gray-600 p-3 rounded-full"
-        style={{ borderRadius: 100, padding: 12, backgroundColor: colors.color_gray}}
-      >
-        <Text>
-          <MaterialIcons
-            name={isCameraOn ? "videocam" : "videocam-off"}
-            size={35}
-            color={"white"}
-          />
-        </Text>
-      </Pressable>
+      {callType === "video" && (
+        <>
+          <Pressable
+            onPress={switchCamera}
+            // className="bg-gray-600 p-3 rounded-full"
+            style={{
+              borderRadius: 100,
+              padding: 12,
+              backgroundColor: colors.color_gray,
+            }}
+          >
+            <Text>
+              <MaterialIcons
+                name={"flip-camera-ios"}
+                size={35}
+                color={"white"}
+              />
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={onToggleCamera}
+            // className="bg-gray-600 p-3 rounded-full"
+            style={{
+              borderRadius: 100,
+              padding: 12,
+              backgroundColor: colors.color_gray,
+            }}
+          >
+            <Text>
+              <MaterialIcons
+                name={isCameraOn ? "videocam" : "videocam-off"}
+                size={35}
+                color={"white"}
+              />
+            </Text>
+          </Pressable>
+        </>
+      )}
       <Pressable
         onPress={onToggleMicrophone}
         // className="bg-gray-600 p-3 rounded-full"
-        style={{ borderRadius: 100, padding: 12, backgroundColor: colors.color_gray}}
+        style={{
+          borderRadius: 100,
+          padding: 12,
+          backgroundColor: colors.color_gray,
+        }}
       >
         <Text>
           <MaterialIcons
@@ -63,7 +89,7 @@ const CallActionBox = ({ switchCamera, toggleMute, toggleCamera, endCall }) => {
       </Pressable>
       <Pressable
         onPress={endCall}
-        style={{ borderRadius: 100, padding: 12, backgroundColor: 'red'}}
+        style={{ borderRadius: 100, padding: 12, backgroundColor: "red" }}
       >
         <Text>
           <MaterialIcons name={"call"} size={35} color={"white"} />

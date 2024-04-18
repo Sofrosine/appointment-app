@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Text, StyleSheet, Button, View } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  Button,
+  View,
+  BackHandler,
+  ActivityIndicator,
+} from "react-native";
 
 import {
   RTCPeerConnection,
@@ -21,6 +28,10 @@ import {
 } from "firebase/firestore";
 import CallActionBox from "../../../components/CallActionBox";
 import { dbFirestore } from "../../../../firebaseConfig";
+import { CALL_TYPE } from "../../../constants";
+import { useNavigation } from "@react-navigation/native";
+import { colors } from "../../../styles/Theme";
+import { Image } from "expo-image";
 
 const configuration = {
   iceServers: [
@@ -31,7 +42,7 @@ const configuration = {
   iceCandidatePoolSize: 10,
 };
 
-export default function JoinScreen({ roomId, screens, setScreen }) {
+export default function JoinScreen({ roomId, callType, pairData }) {
   const [localStream, setLocalStream] = useState<MediaStream>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream>(null);
   const [cachedLocalPC, setCachedLocalPC] = useState<RTCPeerConnection>(null);
@@ -39,13 +50,23 @@ export default function JoinScreen({ roomId, screens, setScreen }) {
   const [isMuted, setIsMuted] = useState(false);
   const [isOffCam, setIsOffCam] = useState(false);
 
+  const navigation = useNavigation();
+
   //Automatically start stream
   useEffect(() => {
     startLocalStream();
-    return () => {
-      endCall();
-    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        endCall();
+        return true;
+      }
+    );
+
+    return () => backHandler.remove();
   }, []);
+
   useEffect(() => {
     if (localStream) {
       joinCall(roomId);
@@ -69,7 +90,8 @@ export default function JoinScreen({ roomId, screens, setScreen }) {
     setRemoteStream(null); // set remoteStream to null or empty when callee leaves the call
     setCachedLocalPC(null);
     // cleanup
-    setScreen(screens.ROOM); //go back to room screen
+    // setScreen(CALL_TYPE.ROOM); //go back to room screen
+    navigation.goBack();
   }
 
   //start local webcam on your device
@@ -150,7 +172,7 @@ export default function JoinScreen({ roomId, screens, setScreen }) {
     onSnapshot(roomRef, (doc) => {
       const data = doc.data();
       if (!data.answer) {
-        setScreen(screens.ROOM);
+        navigation.goBack();
       }
     });
 
@@ -180,14 +202,42 @@ export default function JoinScreen({ roomId, screens, setScreen }) {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.color_gray }}>
+      {callType === "audio" ? (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 999,
+          }}
+        >
+          {remoteStream ? (
+            <Image
+              source={{ uri: pairData?.image_url }}
+              style={{ height: 200, width: 200, borderRadius: 400 }}
+            />
+          ) : (
+            <View style={{ alignItems: "center" }}>
+              <ActivityIndicator size={40} color={colors.color_primary} />
+              <Text>Waiting for doctor...</Text>
+            </View>
+          )}
+        </View>
+      ) : (
+        <View />
+      )}
       <RTCView
-        style={{ flex: 1 }}
+        style={{ flex: 1, display: callType === "audio" ? "none" : "flex" }}
         streamURL={remoteStream && remoteStream.toURL()}
         objectFit={"cover"}
       />
 
-      {remoteStream && !isOffCam && (
+      {remoteStream && !isOffCam && callType === "video" && (
         <RTCView
           style={{
             position: "absolute",
@@ -200,12 +250,15 @@ export default function JoinScreen({ roomId, screens, setScreen }) {
           streamURL={localStream && localStream.toURL()}
         />
       )}
-      <View style={{ position: "absolute", bottom: 0, width: "100%" }}>
+      <View
+        style={{ position: "absolute", bottom: 0, width: "100%", zIndex: 9999 }}
+      >
         <CallActionBox
           switchCamera={switchCamera}
           toggleMute={toggleMute}
           toggleCamera={toggleCamera}
           endCall={endCall}
+          callType={callType}
         />
       </View>
     </View>

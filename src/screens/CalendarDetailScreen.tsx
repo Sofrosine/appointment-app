@@ -1,19 +1,22 @@
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import React, { useRef, useState } from "react";
-import { app, getAuth } from "../../firebaseConfig";
+import { app, dbFirestore, getAuth } from "../../firebaseConfig";
 import Button from "../components/Button";
 import { colors } from "../styles/Theme";
 import { useAppSelector } from "../hooks";
 import dayjs from "dayjs";
+import { CALL_TYPE } from "../constants";
+import { doc, getDoc } from "firebase/firestore";
 
 const auth = getAuth(app);
 
 export default function CalendarDetailScreen({ route, navigation }) {
   const { item } = route.params || {};
 
-  const scrollViewRef = useRef(null);
+  const [loading, setLoading] = useState(false);
 
+  const scrollViewRef = useRef(null);
   const { data: userData } = useAppSelector((state) => state.authReducer) || {};
 
   // Get current date and time
@@ -24,6 +27,34 @@ export default function CalendarDetailScreen({ route, navigation }) {
 
   // Check if the current time is less than the booked date and time
   const isBeforeBookedDateTime = currentTime?.isBefore(bookedDateTime);
+
+  //checks if room is existing
+  const checkMeeting = async () => {
+    if (item?.id) {
+      setLoading(true);
+      const roomRef = doc(dbFirestore, "room", item?.id);
+      const roomSnapshot = await getDoc(roomRef);
+
+      // console.log(roomSnapshot.data());
+      if (!roomSnapshot.exists() || item?.id === "") {
+        // console.log(`Room ${roomId} does not exist.`);
+        Alert.alert("Wait for the doctor to start the meeting.");
+        setLoading(false);
+        return;
+      } else {
+        navigation.navigate("CallScreen", {
+          type: CALL_TYPE.JOIN,
+          roomId: item?.id,
+          callType: item?.appointment_type,
+          pairData: item?.doctor,
+        });
+      }
+      setLoading(false);
+    } else {
+      Alert.alert("Provide a valid Room ID.");
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.out_container}>
@@ -171,9 +202,8 @@ export default function CalendarDetailScreen({ route, navigation }) {
         <Button
           text={"Join Call"}
           disabled={isBeforeBookedDateTime}
-          onPress={() => {
-            navigation.navigate("CallScreen");
-          }}
+          onPress={checkMeeting}
+          loading={loading}
         />
       </View>
     </View>

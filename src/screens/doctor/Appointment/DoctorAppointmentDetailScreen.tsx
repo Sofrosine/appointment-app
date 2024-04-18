@@ -7,6 +7,7 @@ import { colors } from "../../../styles/Theme";
 import { useAppSelector } from "../../../hooks";
 import dayjs from "dayjs";
 import { child, get, getDatabase, ref } from "firebase/database";
+import { CALL_TYPE } from "../../../constants";
 
 const auth = getAuth(app);
 
@@ -191,10 +192,15 @@ export default function DoctorAppointmentDetailScreen({ route, navigation }) {
       </ScrollView>
       <View style={styles.button_container}>
         <Button
-          text={"Join Call"}
+          text={"Start Call"}
           disabled={isBeforeBookedDateTime}
           onPress={() => {
-            navigation.navigate("CallScreen");
+            navigation.navigate("CallScreen", {
+              type: CALL_TYPE.CALL,
+              roomId: item?.child_key,
+              callType: item?.appointment_type,
+              pairData: userData,
+            });
           }}
         />
       </View>

@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Text, StyleSheet, Button, View } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  Button,
+  View,
+  BackHandler,
+  ActivityIndicator,
+} from "react-native";
 
 import {
   RTCPeerConnection,
@@ -22,6 +29,10 @@ import {
 
 import CallActionBox from "../../../components/CallActionBox";
 import { dbFirestore } from "../../../../firebaseConfig";
+import { CALL_TYPE } from "../../../constants";
+import { useNavigation } from "@react-navigation/native";
+import { colors } from "../../../styles/Theme";
+import { Image } from "expo-image";
 
 const configuration = {
   iceServers: [
@@ -32,7 +43,7 @@ const configuration = {
   iceCandidatePoolSize: 10,
 };
 
-export default function DoctorCall({ roomId, screens, setScreen }) {
+export default function DoctorCall({ roomId, callType }) {
   const [localStream, setLocalStream] = useState<MediaStream>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream>(null);
   const [cachedLocalPC, setCachedLocalPC] = useState<RTCPeerConnection>(null);
@@ -40,11 +51,20 @@ export default function DoctorCall({ roomId, screens, setScreen }) {
   const [isMuted, setIsMuted] = useState(false);
   const [isOffCam, setIsOffCam] = useState(false);
 
+  const navigation = useNavigation();
+
   useEffect(() => {
     startLocalStream();
-    return () => {
-      endCall();
-    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        endCall();
+        return true;
+      }
+    );
+
+    return () => backHandler.remove();
   }, []);
 
   useEffect(() => {
@@ -70,7 +90,8 @@ export default function DoctorCall({ roomId, screens, setScreen }) {
     setRemoteStream(null); // set remoteStream to null or empty when callee leaves the call
     setCachedLocalPC(null);
     // cleanup
-    setScreen(screens.ROOM); //go back to room screen
+    // setScreen(CALL_TYPE.ROOM); //go back to room screen
+    navigation.goBack();
   }
 
   //start local webcam on your device
@@ -134,8 +155,10 @@ export default function DoctorCall({ roomId, screens, setScreen }) {
     // Listen for remote answer
     onSnapshot(roomRef, (doc) => {
       const data = doc.data();
-      if (!localPC.remoteDescription && data.answer) {
-        const rtcSessionDescription = new RTCSessionDescription(data.answer);
+      if (!localPC?.remoteDescription && data?.answer) {
+        const rtcSessionDescription = new RTCSessionDescription(
+          data?.answer ?? {}
+        );
         localPC.setRemoteDescription(rtcSessionDescription);
       } else {
         setRemoteStream(null);
@@ -144,7 +167,7 @@ export default function DoctorCall({ roomId, screens, setScreen }) {
 
     // when answered, add candidate to peer connection
     onSnapshot(calleeCandidatesCollection, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
+      snapshot?.docChanges()?.forEach((change) => {
         if (change.type === "added") {
           let data = change.doc.data();
           localPC.addIceCandidate(new RTCIceCandidate(data));
@@ -178,23 +201,40 @@ export default function DoctorCall({ roomId, screens, setScreen }) {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.color_gray }}>
       {!remoteStream && (
-        <RTCView
-          style={{ flex: 1 }}
-          streamURL={localStream && localStream.toURL()}
-          objectFit={"cover"}
-        />
+        <>
+          <RTCView
+            style={{ flex: 1, display: callType === "audio" ? "none" : "flex" }}
+            streamURL={localStream && localStream.toURL()}
+            objectFit={"cover"}
+          />
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "rgba(0,0,0,0.5)",
+            }}
+          >
+            <ActivityIndicator size={40} color={colors.color_primary} />
+            <Text>Waiting for patient...</Text>
+          </View>
+        </>
       )}
 
       {remoteStream && (
         <>
           <RTCView
-            style={{ flex: 1 }}
+            style={{ flex: 1, display: callType === "audio" ? "none" : "flex" }}
             streamURL={remoteStream && remoteStream.toURL()}
             objectFit={"cover"}
           />
-          {!isOffCam && (
+          {!isOffCam && callType === "video" && (
             <RTCView
               //   className="w-32 h-48 absolute right-6 top-8"
               style={{
@@ -208,14 +248,38 @@ export default function DoctorCall({ roomId, screens, setScreen }) {
               streamURL={localStream && localStream.toURL()}
             />
           )}
+          {callType === "audio" ? (
+            <View
+              style={{
+                position: "absolute",
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(0,0,0,0.5)",
+              }}
+            >
+              <Image
+                source={require("../../../../assets/user-profile.png")}
+                style={{ height: 200, width: 200, borderRadius: 400 }}
+              />
+            </View>
+          ) : (
+            <View />
+          )}
         </>
       )}
-      <View style={{ position: "absolute", bottom: 0, width: "100%" }}>
+      <View
+        style={{ position: "absolute", bottom: 0, width: "100%", zIndex: 9999 }}
+      >
         <CallActionBox
           switchCamera={switchCamera}
           toggleMute={toggleMute}
           toggleCamera={toggleCamera}
           endCall={endCall}
+          callType={callType}
         />
       </View>
     </View>
