@@ -52,6 +52,9 @@ export default function JoinScreen({ roomId, callType, pairData }) {
 
   const navigation = useNavigation();
 
+  let callerCandidatesUnsubscribe;
+  let roomUnsubscribe;
+
   //Automatically start stream
   useEffect(() => {
     startLocalStream();
@@ -71,6 +74,12 @@ export default function JoinScreen({ roomId, callType, pairData }) {
     if (localStream) {
       joinCall(roomId);
     }
+
+    return () => {
+      // Cleanup functions to call the unsubscribes on component unmount
+      if (callerCandidatesUnsubscribe) callerCandidatesUnsubscribe();
+      if (roomUnsubscribe) roomUnsubscribe();
+    };
   }, [localStream]);
 
   //End call button
@@ -160,16 +169,19 @@ export default function JoinScreen({ roomId, callType, pairData }) {
     // @ts-ignore
     await updateDoc(roomRef, { answer, connected: true }, { merge: true });
 
-    onSnapshot(callerCandidatesCollection, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === "added") {
-          let data = change.doc.data();
-          localPC.addIceCandidate(new RTCIceCandidate(data));
-        }
-      });
-    });
+    callerCandidatesUnsubscribe = onSnapshot(
+      callerCandidatesCollection,
+      (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === "added") {
+            let data = change.doc.data();
+            localPC.addIceCandidate(new RTCIceCandidate(data));
+          }
+        });
+      }
+    );
 
-    onSnapshot(roomRef, (doc) => {
+    roomUnsubscribe = onSnapshot(roomRef, (doc) => {
       const data = doc.data();
       if (!data.answer) {
         navigation.goBack();
