@@ -1,12 +1,12 @@
 // Import the functions you need from the SDKs you need
 import { FirebaseOptions, initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 import {
   initializeAuth,
   getAuth,
   // @ts-ignore
   getReactNativePersistence,
 } from "firebase/auth";
+import { initializeFirestore } from "firebase/firestore";
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -40,7 +40,8 @@ const firebaseConfig: FirebaseOptions = {
   messagingSenderId: "1080537463144",
   appId: "1:1080537463144:web:49ee4cd882d1b836db3edd",
   measurementId: "G-6YNDZCBZC7",
-  databaseURL: "https://booking-app-67479-default-rtdb.asia-southeast1.firebasedatabase.app/"
+  databaseURL:
+    "https://booking-app-67479-default-rtdb.asia-southeast1.firebasedatabase.app/",
 };
 
 // Initialize Firebase
@@ -48,6 +49,8 @@ const app = initializeApp(firebaseConfig);
 initializeAuth(app, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage),
 });
-const analytics = getAnalytics(app);
+const dbFirestore = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+});
 
-export { app, getAuth, analytics };
+export { app, getAuth, dbFirestore };

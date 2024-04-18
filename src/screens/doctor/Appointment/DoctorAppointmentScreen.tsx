@@ -36,7 +36,7 @@ export default function DoctorAppointmentScreen({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       fetchData();
-    }, [])
+    }, [user])
   );
 
   const fetchData = () => {

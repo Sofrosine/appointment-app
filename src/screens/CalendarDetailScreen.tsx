@@ -172,7 +172,7 @@ export default function CalendarDetailScreen({ route, navigation }) {
           text={"Join Call"}
           disabled={isBeforeBookedDateTime}
           onPress={() => {
-            alert("a");
+            navigation.navigate("CallScreen");
           }}
         />
       </View>

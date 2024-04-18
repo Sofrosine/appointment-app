@@ -26,6 +26,7 @@ import ProfileStack from "./ProfileStack";
 import HomeStack from "./UserStack/HomeStack";
 import SearchStack from "./UserStack/SearchStack";
 import UserAppointmentStack from "./UserStack/UserAppointmentStack";
+import CallScreen from "../screens/call/CallScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -92,9 +93,7 @@ function AuthStack() {
   );
 }
 
-const auth = getAuth(app);
-
-export default function Router() {
+const Main = () => {
   const [user, setUser] = useState(null);
   const { data: userData } = useAppSelector((state) => state.authReducer) || {};
 
@@ -110,36 +109,54 @@ export default function Router() {
   }
 
   return (
-    <>
-      <Tab.Navigator screenOptions={iconPref} initialRouteName="Home">
-        {userData?.role === ROLES.DOCTOR ? (
-          <>
-            <Tab.Screen
-              name="DoctorAppointments"
-              component={DoctorAppointmentStack}
-            />
-          </>
-        ) : userData?.role === ROLES.ADMIN ? (
-          <>
-            <Tab.Screen name="Doctor" component={DoctorStack} />
-            <Tab.Screen name="Appointments" component={AppointmentStack} />
-            <Tab.Screen name="Category" component={CategoryStack} />
-          </>
-        ) : (
-          <>
-            <Tab.Screen name="Home" component={HomeStack} />
-            <Tab.Screen name="Search" component={SearchStack} />
-            <Tab.Screen
-              name="Appointments"
-              component={getTabScreen(UserAppointmentStack, AuthStack)}
-            />
-          </>
-        )}
-        <Tab.Screen
-          name="Profile"
-          component={getTabScreen(ProfileStack, AuthStack)}
-        />
-      </Tab.Navigator>
-    </>
+    <Tab.Navigator screenOptions={iconPref} initialRouteName="Home">
+      {userData?.role === ROLES.DOCTOR ? (
+        <>
+          <Tab.Screen
+            name="DoctorAppointments"
+            component={DoctorAppointmentStack}
+          />
+        </>
+      ) : userData?.role === ROLES.ADMIN ? (
+        <>
+          <Tab.Screen name="Doctor" component={DoctorStack} />
+          <Tab.Screen name="Appointments" component={AppointmentStack} />
+          <Tab.Screen name="Category" component={CategoryStack} />
+        </>
+      ) : (
+        <>
+          <Tab.Screen name="Home" component={HomeStack} />
+          <Tab.Screen name="Search" component={SearchStack} />
+          <Tab.Screen
+            name="Appointments"
+            component={getTabScreen(UserAppointmentStack, AuthStack)}
+          />
+        </>
+      )}
+      <Tab.Screen
+        name="Profile"
+        component={getTabScreen(ProfileStack, AuthStack)}
+      />
+    </Tab.Navigator>
+  );
+};
+
+const auth = getAuth(app);
+
+export default function Router() {
+  const { data: userData } = useAppSelector((state) => state.authReducer) || {};
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="Main" component={Main} />
+
+      {(userData?.role === ROLES.DOCTOR || userData?.role === ROLES.USER) && (
+        <Stack.Screen name="CallScreen" component={CallScreen} />
+      )}
+    </Stack.Navigator>
   );
 }
