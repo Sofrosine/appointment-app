@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "AppointmentAppProject",
-    "slug": "AppointmentAppProject",
+    "name": "BookingApp",
+    "slug": "booking-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -11,9 +11,7 @@
       "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "assets/fonts/*"
-    ],
+    "assetBundlePatterns": ["assets/fonts/*"],
     "ios": {
       "supportsTablet": true,
       "splash": {
@@ -41,18 +39,17 @@
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.WAKE_LOCK"
       ],
-      "package": "com.whitemoon.appointment"
+      "package": "com.whitemoon.booking"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "@config-plugins/react-native-webrtc"
-    ],
+    "plugins": ["@config-plugins/react-native-webrtc"],
     "extra": {
       "eas": {
-        "projectId": "3e4268cb-af8f-46cc-9a91-0d9e4858fd16"
+        "projectId": "7b38f9d1-d77e-45f6-be20-2ae0e36afec5"
       }
-    }
+    },
+    "owner": "whitemoon82"
   }
 }
