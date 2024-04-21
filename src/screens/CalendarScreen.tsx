@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  RefreshControl,
 } from "react-native";
 import parseContentData from "../utils/ParseContentData";
 import { colors, sizes } from "../styles/Theme";
@@ -25,6 +26,8 @@ const auth = getAuth(app);
 export default function CalendarScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [appointmentList, setAppointmentList] = useState([]);
+  const [refreshing, setRefreshing] = useState(false); // State for pull-to-refresh
+
   const { data: userData } = useAppSelector((state) => state.authReducer);
   const user = auth?.currentUser;
 
@@ -40,9 +43,18 @@ export default function CalendarScreen({ navigation }) {
     }, [])
   );
 
-  const fetchData = () => {
+  // Define an async function for fetching data on refresh
+  const onRefresh = useCallback(async () => {
+    fetchData(true);
+  }, []);
+
+  const fetchData = (isRefresh?: boolean) => {
     const dbRef = ref(getDatabase());
     setLoading(true);
+    if (isRefresh) {
+      setRefreshing(true);
+    }
+
     get(child(dbRef, "appointments/" + user?.uid))
       .then((snapshot) => {
         if (snapshot.exists()) {
@@ -55,6 +67,9 @@ export default function CalendarScreen({ navigation }) {
       })
       .finally(() => {
         setLoading(false);
+        if (isRefresh) {
+          setRefreshing(false);
+        }
       });
   };
 
@@ -101,43 +116,40 @@ export default function CalendarScreen({ navigation }) {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 100 }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <Text style={styles.header_text}>My Appointments</Text>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      >
-        {loading ? (
-          <ActivityIndicator
-            style={styles.loading_container}
-            size="large"
-            color={colors.color_primary}
-          />
-        ) : (
-          <View style={styles.list_container}>
-            {appointmentList?.length === 0 ? (
-              <Text style={styles.emptyViewText}>No appointments found!</Text>
-            ) : (
-              <View>
-                {appointmentList?.map((appointment) => (
-                  <CardAppointment
-                    onPressDetail={() => {
-                      navigation.navigate("CalendarDetailScreen", {
-                        item: appointment,
-                      });
-                    }}
-                    appointment={appointment}
-                    serviceInfo={appointment?.doctor}
-                    key={appointment.id}
-                    onPressCancel={() => handleCancel(appointment)}
-                  />
-                ))}
-              </View>
-            )}
-          </View>
-        )}
-      </ScrollView>
-    </View>
+      {loading ? (
+        <ActivityIndicator size="large" color={colors.color_primary} />
+      ) : (
+        <View style={styles.list_container}>
+          {appointmentList?.length === 0 ? (
+            <Text style={styles.emptyViewText}>No appointments found!</Text>
+          ) : (
+            <View>
+              {appointmentList?.map((appointment) => (
+                <CardAppointment
+                  onPressDetail={() => {
+                    navigation.navigate("CalendarDetailScreen", {
+                      item: appointment,
+                    });
+                  }}
+                  appointment={appointment}
+                  serviceInfo={appointment?.doctor}
+                  key={appointment.id}
+                  onPressCancel={() => handleCancel(appointment)}
+                />
+              ))}
+            </View>
+          )}
+        </View>
+      )}
+    </ScrollView>
   );
 }
 

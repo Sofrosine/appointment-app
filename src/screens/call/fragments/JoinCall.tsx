@@ -27,11 +27,20 @@ import {
   deleteField,
 } from "firebase/firestore";
 import CallActionBox from "../../../components/CallActionBox";
-import { dbFirestore } from "../../../../firebaseConfig";
+import { app, dbFirestore } from "../../../../firebaseConfig";
 import { CALL_TYPE } from "../../../constants";
 import { useNavigation } from "@react-navigation/native";
 import { colors } from "../../../styles/Theme";
 import { Image } from "expo-image";
+import ReactNativeRecordScreen, {
+  RecordingResponse,
+} from "react-native-record-screen";
+import {
+  getDownloadURL,
+  getStorage,
+  ref as refStorage,
+  uploadBytesResumable,
+} from "@firebase/storage";
 
 const configuration = {
   iceServers: [
@@ -46,6 +55,7 @@ export default function JoinScreen({ roomId, callType, pairData }) {
   const [localStream, setLocalStream] = useState<MediaStream>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream>(null);
   const [cachedLocalPC, setCachedLocalPC] = useState<RTCPeerConnection>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [isMuted, setIsMuted] = useState(false);
   const [isOffCam, setIsOffCam] = useState(false);
@@ -130,6 +140,45 @@ export default function JoinScreen({ roomId, callType, pairData }) {
     setLocalStream(newStream);
   };
 
+  const uploadVideo = async (res: RecordingResponse) => {
+    if (res?.status === "success") {
+      setIsLoading(true);
+      const outputURL = res.result.outputURL;
+
+      // Firebase Upload
+      const filename = outputURL.substring(outputURL.lastIndexOf("/") + 1);
+      const storage = getStorage(app);
+      const storageRef = refStorage(storage, `appointments-videos/${filename}`);
+
+      try {
+        // Convert URI to Blob
+        const response = await fetch("file://" + outputURL);
+        const blob = await response.blob();
+        const uploadTask = uploadBytesResumable(storageRef, blob);
+
+        return new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              // Handle progress if needed
+            },
+            (error) => reject(error),
+            () => {
+              getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                console.log(downloadURL);
+                resolve(downloadURL);
+              });
+            }
+          );
+        });
+      } catch (error) {
+        console.error("Error uploading video:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   //join call function
   const joinCall = async (id) => {
     const roomRef = doc(dbFirestore, "room", id);
@@ -181,9 +230,11 @@ export default function JoinScreen({ roomId, callType, pairData }) {
       }
     );
 
-    roomUnsubscribe = onSnapshot(roomRef, (doc) => {
+    roomUnsubscribe = onSnapshot(roomRef, async (doc) => {
       const data = doc.data();
       if (!data.answer) {
+        // const res = await ReactNativeRecordScreen.stopRecording();
+        // await uploadVideo(res);
         navigation.goBack();
       }
     });
@@ -215,6 +266,22 @@ export default function JoinScreen({ roomId, callType, pairData }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.color_gray }}>
+      {isLoading && (
+        <View
+          style={{
+            position: "absolute",
+            right: 0,
+            top: 0,
+            left: 0,
+            bottom: 0,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.5)",
+          }}
+        >
+          <ActivityIndicator size="large" color={colors.color_primary} />
+        </View>
+      )}
       {callType === "audio" ? (
         <View
           style={{

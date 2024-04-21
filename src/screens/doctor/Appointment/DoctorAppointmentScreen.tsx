@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  RefreshControl,
 } from "react-native";
 import parseContentData from "../../../utils/ParseContentData";
 import { colors, sizes } from "../../../styles/Theme";
@@ -25,6 +26,8 @@ const auth = getAuth(app);
 export default function DoctorAppointmentScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [appointmentList, setAppointmentList] = useState([]);
+  const [refreshing, setRefreshing] = useState(false); // State for pull-to-refresh
+
   const user = auth?.currentUser;
 
   // Notification setup
@@ -39,9 +42,18 @@ export default function DoctorAppointmentScreen({ navigation }) {
     }, [user])
   );
 
-  const fetchData = () => {
+  // Define an async function for fetching data on refresh
+  const onRefresh = useCallback(async () => {
+    fetchData(true);
+  }, []);
+
+  const fetchData = (isRefresh?: boolean) => {
     const dbRef = ref(getDatabase());
     setLoading(true);
+
+    if (isRefresh) {
+      setRefreshing(true);
+    }
 
     get(child(dbRef, "appointments/"))
       .then((snapshot) => {
@@ -56,6 +68,9 @@ export default function DoctorAppointmentScreen({ navigation }) {
       })
       .finally(() => {
         setLoading(false);
+        if (isRefresh) {
+          setRefreshing(false);
+        }
       });
   };
 
@@ -102,14 +117,15 @@ export default function DoctorAppointmentScreen({ navigation }) {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <Text style={styles.header_text}>Appointments</Text>
       {loading ? (
-        <ActivityIndicator
-          style={styles.loading_container}
-          size="large"
-          color={colors.color_primary}
-        />
+        <ActivityIndicator size="large" color={colors.color_primary} />
       ) : (
         <View style={styles.list_container}>
           {loading ? (

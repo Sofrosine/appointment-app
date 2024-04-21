@@ -8,6 +8,9 @@ import { useAppSelector } from "../hooks";
 import dayjs from "dayjs";
 import { CALL_TYPE } from "../constants";
 import { doc, getDoc } from "firebase/firestore";
+import ReactNativeRecordScreen, {
+  RecordingResult,
+} from "react-native-record-screen";
 
 const auth = getAuth(app);
 
@@ -54,6 +57,22 @@ export default function CalendarDetailScreen({ route, navigation }) {
       Alert.alert("Provide a valid Room ID.");
       setLoading(false);
     }
+  };
+
+  const handleStart = async () => {
+    // const res = await ReactNativeRecordScreen.startRecording({
+    //   mic: true,
+    //   fps: 20,
+    //   bitrate: 2048000,
+    // }).catch((error: any) => {
+    //   console.warn(error);
+    // });
+
+    // if (res === RecordingResult.PermissionError) {
+    //   Alert.alert(res);
+    // } else if (res === RecordingResult.Started) {
+    checkMeeting();
+    // }
   };
 
   return (
@@ -197,15 +216,25 @@ export default function CalendarDetailScreen({ route, navigation }) {
             </Text>
           </View>
         </View>
+        <View style={styles.button_container}>
+          {item?.is_closed ? (
+            <View>
+              <Text
+                style={{ textAlign: "center", marginTop: 0, fontSize: 20 }}
+              >
+                This appointment has been closed.
+              </Text>
+            </View>
+          ) : (
+            <Button
+              text={"Join Call"}
+              // disabled={isBeforeBookedDateTime}
+              onPress={handleStart}
+              loading={loading}
+            />
+          )}
+        </View>
       </ScrollView>
-      <View style={styles.button_container}>
-        <Button
-          text={"Join Call"}
-          disabled={isBeforeBookedDateTime}
-          onPress={checkMeeting}
-          loading={loading}
-        />
-      </View>
     </View>
   );
 }
@@ -264,8 +293,8 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   button_container: {
-    flexDirection: "row",
-    marginBottom: 126,
+    marginBottom: 124,
+    marginTop: 40,
     paddingHorizontal: 24,
   },
   about: {

@@ -4,11 +4,12 @@
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
+    "@closetothe/expo-record-screen-config-plugin": "^0.2.0",
     "@config-plugins/react-native-webrtc": "^8.0.0",
     "@expo-google-fonts/inter": "^0.2.3",
     "@expo-google-fonts/mulish": "^0.2.3",
@@ -20,9 +21,9 @@
     "@react-navigation/native": "^6.1.7",
     "@react-navigation/stack": "^6.3.17",
     "@reduxjs/toolkit": "^2.2.3",
+    "base64-js": "^1.5.1",
     "dayjs": "^1.11.10",
     "expo": "^50.0.17",
-    "expo-dev-client": "~3.3.11",
     "expo-device": "~5.9.4",
     "expo-font": "~11.10.3",
     "expo-image": "~1.10.6",
@@ -39,21 +40,20 @@
     "react-native-calendars": "^1.1300.0",
     "react-native-dropdown-picker": "^5.4.6",
     "react-native-flash-message": "^0.4.1",
+    "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "~2.14.0",
     "react-native-maps": "1.10.0",
     "react-native-popup-menu": "^0.16.1",
     "react-native-reanimated": "~3.6.2",
+    "react-native-record-screen": "^0.6.2",
     "react-native-safe-area-context": "4.8.2",
     "react-native-screens": "~3.29.0",
+    "react-native-video": "^5.2.1",
     "react-native-webrtc": "^118.0.6",
     "react-redux": "^9.1.0",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0",
     "typescript": "^5.4.4"
-  },
-  "resolutions": {
-    "wrap-ansi": "7.0.0",
-    "string-width": "4.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

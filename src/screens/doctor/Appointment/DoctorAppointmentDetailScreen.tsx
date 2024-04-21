@@ -1,4 +1,12 @@
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import React, { useEffect, useRef, useState } from "react";
 import { app, getAuth } from "../../../../firebaseConfig";
@@ -6,8 +14,10 @@ import Button from "../../../components/Button";
 import { colors } from "../../../styles/Theme";
 import { useAppSelector } from "../../../hooks";
 import dayjs from "dayjs";
-import { child, get, getDatabase, ref } from "firebase/database";
+import { child, get, getDatabase, ref, set } from "firebase/database";
 import { CALL_TYPE } from "../../../constants";
+import RecordScreen, { RecordingResult } from "react-native-record-screen";
+import { showTopMessage } from "../../../utils/ErrorHandler";
 
 const auth = getAuth(app);
 
@@ -17,6 +27,7 @@ export default function DoctorAppointmentDetailScreen({ route, navigation }) {
   const scrollViewRef = useRef(null);
 
   const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // Get current date and time
   const currentTime = dayjs();
@@ -45,6 +56,48 @@ export default function DoctorAppointmentDetailScreen({ route, navigation }) {
       console.error(error);
     } finally {
       //   setLoading(false);
+    }
+  };
+
+  const handleStart = async () => {
+    // const res = await RecordScreen.startRecording({
+    //   mic: true,
+    //   fps: 20,
+    //   bitrate: 1024000,
+    // }).catch((error: any) => {
+    //   console.warn(error);
+    // });
+
+    // if (res === RecordingResult.PermissionError) {
+    //   Alert.alert(res);
+    // } else if (res === RecordingResult.Started) {
+    navigation.navigate("CallScreen", {
+      type: CALL_TYPE.CALL,
+      roomId: item?.child_key,
+      callType: item?.appointment_type,
+      pairData: userData,
+    });
+    // }
+  };
+
+  const handleClose = async () => {
+    setLoading(true);
+    try {
+      const db = getDatabase(app);
+      const updateUserRef = ref(
+        db,
+        `appointments/${item?.user_id}/${item?.child_key}`
+      );
+      const res = await set(updateUserRef, {
+        ...item,
+        child_key: null,
+        is_closed: true,
+      });
+      showTopMessage("Appointment update successfully", "success");
+      navigation.goBack();
+    } catch (error) {
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -189,21 +242,38 @@ export default function DoctorAppointmentDetailScreen({ route, navigation }) {
             </Text>
           </View>
         </View>
+        {loading ? (
+          <ActivityIndicator
+            style={{ marginTop: 60 }}
+            size={40}
+            color={colors.color_primary}
+          />
+        ) : item?.is_closed ? (
+          <View>
+            <Text style={{ textAlign: "center", marginTop: 40, fontSize: 20 }}>
+              This appointment has been closed.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.button_container}>
+            <Button
+              text={"Start Call"}
+              // disabled={isBeforeBookedDateTime}
+              onPress={() => {
+                handleStart();
+              }}
+            />
+            <Button
+              text={"Close Appointment"}
+              style={{ backgroundColor: "red" }}
+              // disabled={isBeforeBookedDateTime}
+              onPress={() => {
+                handleClose();
+              }}
+            />
+          </View>
+        )}
       </ScrollView>
-      <View style={styles.button_container}>
-        <Button
-          text={"Start Call"}
-          disabled={isBeforeBookedDateTime}
-          onPress={() => {
-            navigation.navigate("CallScreen", {
-              type: CALL_TYPE.CALL,
-              roomId: item?.child_key,
-              callType: item?.appointment_type,
-              pairData: userData,
-            });
-          }}
-        />
-      </View>
     </View>
   );
 }
@@ -262,9 +332,11 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   button_container: {
-    flexDirection: "row",
-    marginBottom: 126,
+    flexDirection: "column",
+    marginTop: 40,
     paddingHorizontal: 24,
+    gap: 16,
+    marginBottom: 124,
   },
   about: {
     fontSize: 20,

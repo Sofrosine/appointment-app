@@ -6,6 +6,7 @@ import {
   ScrollView,
   ActivityIndicator,
   ImageBackground,
+  Alert,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { colors } from "../styles/Theme";
@@ -20,6 +21,16 @@ import { app, getAuth } from "../../firebaseConfig";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAppSelector } from "../hooks";
 import { showTopMessage } from "../utils/ErrorHandler";
+import Button from "../components/Button";
+import RecordScreen, { RecordingResult } from "react-native-record-screen";
+import {
+  getDownloadURL,
+  getStorage,
+  ref as refStorage,
+  uploadBytesResumable,
+} from "@firebase/storage";
+import RNFS from "react-native-fs";
+import { toByteArray } from "base64-js";
 
 const auth = getAuth(app);
 export default function HomeScreen({ navigation }) {
@@ -28,6 +39,8 @@ export default function HomeScreen({ navigation }) {
 
   const [userAuth, setUserAuth] = useState(null);
   const [isReady, setIsReady] = useState(false);
+  const [uri, setUri] = useState<string>("");
+  const [recording, setRecording] = useState<boolean>(false);
 
   const { data: userData } = useAppSelector((state) => state.authReducer) || {};
 
@@ -146,6 +159,75 @@ export default function HomeScreen({ navigation }) {
     });
   };
 
+  const _handleOnRecording = async () => {
+    if (recording) {
+      setRecording(false);
+      const res = await RecordScreen.stopRecording();
+      console.log("res", res);
+      if (res?.status === "success") {
+        setUri(res.result.outputURL);
+
+        const outputURL = res.result.outputURL;
+
+        // Firebase Upload
+        const filename = outputURL.substring(outputURL.lastIndexOf("/") + 1);
+        const storage = getStorage(app);
+        const storageRef = refStorage(
+          storage,
+          `appointments-videos/${filename}`
+        );
+
+        try {
+          // Convert URI to Blob
+          const response = await fetch("file://" + outputURL);
+          const blob = await response.blob();
+          const uploadTask = uploadBytesResumable(storageRef, blob);
+
+          return new Promise((resolve, reject) => {
+            uploadTask.on(
+              "state_changed",
+              (snapshot) => {
+                // Handle progress if needed
+              },
+              (error) => reject(error),
+              () => {
+                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                  console.log("dodod", downloadURL);
+                  resolve(downloadURL);
+                });
+              }
+            );
+          });
+        } catch (error) {
+          console.error("Error uploading video:", error);
+        }
+      }
+    } else {
+      setUri("");
+      setRecording(true);
+      const res = await RecordScreen.startRecording({
+        mic: true,
+        fps: 20,
+        bitrate: 1024000,
+      }).catch((error: any) => {
+        console.warn(error);
+        setRecording(false);
+        setUri("");
+      });
+
+      if (res === RecordingResult.PermissionError) {
+        Alert.alert(res);
+        setRecording(false);
+        setUri("");
+      }
+    }
+  };
+
+  const _handleOnCleanSandbox = useCallback(() => {
+    RecordScreen.clean();
+    setUri("");
+  }, []);
+
   return (
     <ScrollView>
       {isReady ? (
@@ -160,6 +242,12 @@ export default function HomeScreen({ navigation }) {
                 onPress={goToNotifications}
               />
             </View>
+            {/* <Button
+              text={recording ? "Stop" : "Start"}
+              onPress={_handleOnRecording}
+            />
+            <Button text={"Clean"} onPress={_handleOnCleanSandbox} /> */}
+
             <ImageBackground
               style={styles.card_container}
               imageStyle={{ borderRadius: 20, overflow: "hidden" }}
