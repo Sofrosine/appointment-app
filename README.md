@@ -36,14 +36,9 @@ The Online Appointment Application aims to address the inefficiencies in appoint
 - Open the terminal in the project folder and run `yarn install` to install dependencies.
 - Create a Firebase account and add the Firebase configuration to the project.
 
-# 2. Install EAS CLI
+# 2. Install App
 
-## If you already have APK Dev from your developer, you can `skip` steps number 1-4 and directly start from 5th step
-
-1.  Run `npm install -g eas-cli`
-2.  Run `npx expo install expo-dev-client`
-3.  Run `eas login` and login with same credential with user where your project belongs
-4.  Run `eas build --profile development --platform android` to build the development APK into your Expo
-5.  Go to the Expo website and log in to view your build. Wait for it to finish. Once it’s finished, you will need to install it on your Android device and run the following command in your local PC terminal: `npx expo start --dev-client`
+1.  Run `npx expo prebuild` to create android & ios folder
+2.  Run `npx expo run android` to run the app
 
 ---
