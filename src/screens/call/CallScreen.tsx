@@ -13,7 +13,7 @@ import { colors } from "../../styles/Theme";
 import { CALL_TYPE } from "../../constants";
 
 const CallScreen = ({ route }) => {
-  const { type, roomId, callType, pairData } = route.params || {};
+  const { type, roomId, callType, pairData, directory } = route.params || {};
 
   let content;
 
@@ -30,11 +30,15 @@ const CallScreen = ({ route }) => {
     //   break;
 
     case CALL_TYPE.CALL:
-      content = <Call roomId={roomId} callType={callType} />;
+      content = (
+        <Call roomId={roomId} callType={callType} directory={directory} />
+      );
       break;
 
     case CALL_TYPE.JOIN:
-      content = <JoinCall pairData={pairData} roomId={roomId} callType={callType} />;
+      content = (
+        <JoinCall pairData={pairData} roomId={roomId} callType={callType} />
+      );
       break;
 
     default:

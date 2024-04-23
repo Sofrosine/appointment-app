@@ -6,6 +6,8 @@ import {
   View,
   BackHandler,
   ActivityIndicator,
+  Alert,
+  Platform,
 } from "react-native";
 
 import {
@@ -33,6 +35,21 @@ import { CALL_TYPE } from "../../../constants";
 import { useNavigation } from "@react-navigation/native";
 import { colors } from "../../../styles/Theme";
 import { Image } from "expo-image";
+import ReactNativeRecordScreen, {
+  RecordingResponse,
+} from "react-native-record-screen";
+import {
+  writeAsStringAsync,
+  createUploadTask,
+  documentDirectory,
+  EncodingType,
+  downloadAsync,
+  StorageAccessFramework,
+  readAsStringAsync,
+  cacheDirectory,
+} from "expo-file-system";
+import { shareAsync } from "expo-sharing";
+import { showTopMessage } from "../../../utils/ErrorHandler";
 
 const configuration = {
   iceServers: [
@@ -43,7 +60,7 @@ const configuration = {
   iceCandidatePoolSize: 10,
 };
 
-export default function DoctorCall({ roomId, callType }) {
+export default function DoctorCall({ roomId, callType, directory }) {
   const [localStream, setLocalStream] = useState<MediaStream>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream>(null);
   const [cachedLocalPC, setCachedLocalPC] = useState<RTCPeerConnection>(null);
@@ -91,8 +108,97 @@ export default function DoctorCall({ roomId, callType }) {
     setCachedLocalPC(null);
     // cleanup
     // setScreen(CALL_TYPE.ROOM); //go back to room screen
+    saveRecord();
+    showTopMessage("The call session has been saved", "success");
     navigation.goBack();
   }
+
+  async function saveFile(uri, filename, mimetype) {
+    if (Platform.OS === "android") {
+      const permissions =
+        await StorageAccessFramework.requestDirectoryPermissionsAsync();
+
+      if (permissions.granted) {
+        const base64 = await readAsStringAsync(uri, {
+          encoding: EncodingType.Base64,
+        });
+
+        await StorageAccessFramework.createFileAsync(
+          permissions.directoryUri,
+          filename,
+          mimetype
+        )
+          .then(async (uri) => {
+            await writeAsStringAsync(uri, base64, {
+              encoding: EncodingType.Base64,
+            });
+          })
+          .catch((e) => console.log(e));
+      } else {
+        alert("a");
+        shareAsync(uri);
+      }
+    } else {
+      shareAsync(uri);
+    }
+  }
+
+  async function download() {
+    const filename = "asdasdasd.pdf";
+    const result = await downloadAsync(
+      "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+      documentDirectory + filename
+    );
+
+    // Log the download result
+    console.log(result);
+
+    // Save the downloaded file
+    saveFile(result.uri, filename, result.headers["Content-Type"]);
+
+    // Download the file and get its local URI
+    // const { uri } = await downloadAsync(
+    //   "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    //   cacheDirectory + "zxczxc.pdf"
+    // );
+
+    // // Share the file with the user
+    // await shareAsync(uri);
+  }
+
+  const saveRecord = async () => {
+    const res = await ReactNativeRecordScreen.stopRecording();
+
+    if (res?.status === "success") {
+      const outputURL = res.result.outputURL;
+
+      const filename = outputURL.substring(outputURL.lastIndexOf("/") + 1);
+      const response = await fetch("file://" + outputURL);
+      const fileData = await response.blob();
+
+      const fileUri = `${directory}/${filename}`; // Or other desired location
+
+      const fr = new FileReader();
+      fr.onload = async () => {
+        await StorageAccessFramework.createFileAsync(
+          fileUri,
+          filename,
+          "application/octet-stream"
+        )
+          .then(async (newfileUri) => {
+            await writeAsStringAsync(
+              newfileUri,
+              String(fr.result)?.split(",")[1],
+              { encoding: EncodingType.Base64 }
+            );
+          })
+          .catch((error) => {
+            console.error("Error creating and writing to file:", error);
+          });
+      };
+      fr.readAsDataURL(fileData);
+    }
+  };
 
   //start local webcam on your device
   const startLocalStream = async () => {

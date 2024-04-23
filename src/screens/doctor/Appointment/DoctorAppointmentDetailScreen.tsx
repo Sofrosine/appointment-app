@@ -2,6 +2,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  PermissionsAndroid,
   ScrollView,
   StyleSheet,
   Text,
@@ -18,6 +19,7 @@ import { child, get, getDatabase, ref, set } from "firebase/database";
 import { CALL_TYPE } from "../../../constants";
 import RecordScreen, { RecordingResult } from "react-native-record-screen";
 import { showTopMessage } from "../../../utils/ErrorHandler";
+import { StorageAccessFramework } from "expo-file-system";
 
 const auth = getAuth(app);
 
@@ -60,24 +62,32 @@ export default function DoctorAppointmentDetailScreen({ route, navigation }) {
   };
 
   const handleStart = async () => {
-    // const res = await RecordScreen.startRecording({
-    //   mic: true,
-    //   fps: 20,
-    //   bitrate: 1024000,
-    // }).catch((error: any) => {
-    //   console.warn(error);
-    // });
+    const permissions =
+      await StorageAccessFramework.requestDirectoryPermissionsAsync();
 
-    // if (res === RecordingResult.PermissionError) {
-    //   Alert.alert(res);
-    // } else if (res === RecordingResult.Started) {
-    navigation.navigate("CallScreen", {
-      type: CALL_TYPE.CALL,
-      roomId: item?.child_key,
-      callType: item?.appointment_type,
-      pairData: userData,
-    });
-    // }
+    if (permissions.granted) {
+      const res = await RecordScreen.startRecording({
+        mic: true,
+        fps: 20,
+        bitrate: 1024000,
+      }).catch((error: any) => {
+        console.warn(error);
+      });
+
+      if (res === RecordingResult.PermissionError) {
+        Alert.alert(res);
+      } else if (res === RecordingResult.Started) {
+        navigation.navigate("CallScreen", {
+          type: CALL_TYPE.CALL,
+          roomId: item?.child_key,
+          callType: item?.appointment_type,
+          pairData: userData,
+          directory: permissions.directoryUri,
+        });
+      }
+    } else {
+      Alert.alert("Please choose your download directory path first");
+    }
   };
 
   const handleClose = async () => {

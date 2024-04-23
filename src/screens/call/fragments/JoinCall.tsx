@@ -140,45 +140,6 @@ export default function JoinScreen({ roomId, callType, pairData }) {
     setLocalStream(newStream);
   };
 
-  const uploadVideo = async (res: RecordingResponse) => {
-    if (res?.status === "success") {
-      setIsLoading(true);
-      const outputURL = res.result.outputURL;
-
-      // Firebase Upload
-      const filename = outputURL.substring(outputURL.lastIndexOf("/") + 1);
-      const storage = getStorage(app);
-      const storageRef = refStorage(storage, `appointments-videos/${filename}`);
-
-      try {
-        // Convert URI to Blob
-        const response = await fetch("file://" + outputURL);
-        const blob = await response.blob();
-        const uploadTask = uploadBytesResumable(storageRef, blob);
-
-        return new Promise((resolve, reject) => {
-          uploadTask.on(
-            "state_changed",
-            (snapshot) => {
-              // Handle progress if needed
-            },
-            (error) => reject(error),
-            () => {
-              getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                console.log(downloadURL);
-                resolve(downloadURL);
-              });
-            }
-          );
-        });
-      } catch (error) {
-        console.error("Error uploading video:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
   //join call function
   const joinCall = async (id) => {
     const roomRef = doc(dbFirestore, "room", id);
